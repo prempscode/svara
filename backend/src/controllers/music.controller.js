@@ -293,6 +293,41 @@ async function toggleLike(req, res) {
   }
 }
 
+async function getLikedFeed(req, res) {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [musics, total] = await Promise.all([
+      musicModel
+        .find({ likes: userId })
+        .populate("artist", "username email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      musicModel.countDocuments({ likes: userId }),
+    ]);
+
+    res.status(200).json({
+      message: "Liked feed fetched successfully",
+      musics: musics,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
+
 module.exports = {
   createMusic,
   updateMusic,
