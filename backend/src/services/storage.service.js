@@ -5,11 +5,11 @@ const ImageKitClient = new ImageKit({
 });
 
 async function uploadFile(file) {
-  // file.mimetype comes from Multer, e.g. "audio/mpeg" or "image/png"
+
   const isAudio = file.mimetype.startsWith("audio/");
 
-  const folder = isAudio ? "svara/audio" : "svara/covers";
-  const prefix = isAudio ? "music" : "cover";
+  const folder = isAudio ? "svara/audio" : "svara/image";
+  const prefix = isAudio ? "music" : "image";
 
   const result = await ImageKitClient.files.upload({
     file: file.buffer,

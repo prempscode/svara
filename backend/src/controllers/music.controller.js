@@ -9,8 +9,8 @@ async function createMusic(req, res) {
     const { uri, title } = req.body;
 
     // get the file from the request and upload it to imagekit and get the url of the uploaded file
-    const file = req.file;
-    const result = await uploadFile(file.buffer.toString("base64"));
+    const audioFile = req.file;
+    const result = await uploadFile(audioFile.buffer.toString("base64"));
 
     const music = await musicModel.create({
       uri: result.url,
@@ -136,6 +136,8 @@ async function getAlbumById(req, res) {
     });
   }
 }
+
+
 
 module.exports = {
   createMusic,

@@ -10,10 +10,14 @@ const upload = multer({
 
 router.post(
   "/upload",
-  authMiddleware.authArtist,
-  upload.single("music"),
+  authMiddleware.authGlobal,
+  upload.fields([
+    { name: "audio", maxCount: 1 },
+    { name: "image", maxCount: 1 },
+  ]),
   musicController.createMusic,
 );
+
 router.post("/album", authMiddleware.authArtist, musicController.createAlbum);
 
 router.get("/", authMiddleware.authGlobal, musicController.getAllMusics);
