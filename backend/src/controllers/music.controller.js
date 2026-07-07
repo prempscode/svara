@@ -36,7 +36,6 @@ async function createMusic(req, res) {
   }
 }
 
-
 async function updateMusic(req, res) {
   try {
     const { id } = req.params;
@@ -84,23 +83,34 @@ async function updateMusic(req, res) {
   }
 }
 
+async function getAllMusics(req, res) {
+  // using populate will give use the user detail instead of the id of the user, and
+  // since are providing "username email" with the artist ref , it will only give us
+  // the username and email , it will not give us the password and role .
 
+  try {
+    // here we are using limit() as we are getting all the musics so if we get all the
+    // musics at once it will be bulky and may server crash so we use it to limit
+    // the output .
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /*
+      we are also using the .skip() which help us in pagination :
+      like if we have 10 data and we wrote : .skip(2) .limit(4), then
+      what it does basically : it skip first 2 data and prints 4 data and 
+      use this logic in pagination.
+    */
+    const musics = await musicModel.find().populate("artist", "username email");
+    res.status(200).json({
+      message: "Musics fetched successfully",
+      musics: musics,
+    });
+  } catch (e) {
+    res.status(e.status || 500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
 
 async function createAlbum(req, res) {
   // const musicList = await musicModel.find().populate("artist", "name");
@@ -125,38 +135,6 @@ async function createAlbum(req, res) {
     });
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
-  }
-}
-
-async function getAllMusics(req, res) {
-  // using populate will give use the user detail instead of the id of the user, and
-  // since are providing "username email" with the artist ref , it will only give us
-  // the username and email , it will not give us the password and role .
-
-  try {
-    // here we are using limit() as we are getting all the musics so if we get all the
-    // musics at once it will be bulky and may server crash so we use it to limit
-    // the output .
-
-    /*
-      we are also using the .skip() which help us in pagination :
-      like if we have 10 data and we wrote : .skip(2) .limit(4), then
-      what it does basically : it skip first 2 data and prints 4 data and 
-      use this logic in pagination.
-    */
-    const musics = await musicModel
-      .find()
-      .limit(2)
-      .populate("artist", "username email");
-    res.status(201).json({
-      message: "Musics fetched successfully",
-      musics: musics,
-    });
-  } catch (e) {
-    res.status(e.status || 500).json({
       message: "error occured in music.controller",
       error: e.message,
     });
