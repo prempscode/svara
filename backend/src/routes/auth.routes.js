@@ -20,25 +20,21 @@ router.post("/login", authController.loginUser);
 
 // logout
 // here the concept we are using for the logout is basic
-// but in production we use token-blacklisting & we use 
+// but in production we use token-blacklisting & we use
 // it so that the old token generated couldnt be used
-// by any other to misuse it .  
+// by any other to misuse it .
 router.post("/logout", authController.logoutUser);
 
-// USER PROFILE ROUTES 
+// USER PROFILE ROUTES
 
 // get own profile
-router.get(
-  "/profile",
-  authMiddleware.authGlobal,
-  authController.getProfile
-);
+router.get("/profile", authMiddleware.authGlobal, authController.getProfile);
 
 // get any user's public profile (for viewing other users)
 router.get(
   "/profile/:userId",
   authMiddleware.authGlobal,
-  authController.getUserProfile
+  authController.getUserProfile,
 );
 
 // update own profile (with optional profile image upload)
@@ -46,14 +42,14 @@ router.patch(
   "/profile",
   authMiddleware.authGlobal,
   upload.fields([{ name: "image", maxCount: 1 }]),
-  authController.updateProfile
+  authController.updateProfile,
 );
 
 // delete own account
 router.delete(
   "/profile",
   authMiddleware.authGlobal,
-  authController.deleteAccount
+  authController.deleteAccount,
 );
 
 module.exports = router;
