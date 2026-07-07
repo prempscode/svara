@@ -1,20 +1,30 @@
 const { ImageKit } = require("@imagekit/nodejs");
 
-// Initialize ImageKit with your credentials
 const ImageKitClient = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 });
-// Function to upload a file to ImageKit
+
 async function uploadFile(file) {
+  // file.mimetype comes from Multer, e.g. "audio/mpeg" or "image/png"
+  const isAudio = file.mimetype.startsWith("audio/");
+
+  const folder = isAudio ? "svara/audio" : "svara/covers";
+  const prefix = isAudio ? "music" : "cover";
+
   const result = await ImageKitClient.files.upload({
-    file,
-    fileName: "music_" + Date.now(),
-    folder: "yt-complete-bbackend/music",
+    file: file.buffer,
+    fileName: `${prefix}_${Date.now()}`,
+    folder,
   });
+
   return result;
 }
 
-module.exports = { uploadFile };
+async function deleteFile(fileId) {
+  return await ImageKitClient.files.delete(fileId);
+}
+
+module.exports = { uploadFile, deleteFile };
 
 /*
  **Why mimetype instead of filename?**
