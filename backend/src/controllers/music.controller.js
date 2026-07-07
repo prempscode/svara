@@ -283,14 +283,17 @@ async function toggleLike(req, res) {
 
     if (isLiked) {
       music.likes.splice(likeIndex, 1);
+      music.likesCount = music.likes.length;
     } else {
       music.likes.push(userId);
+      music.likesCount = music.likes.length;
     }
 
     await music.save();
 
     res.status(200).json({
       message: isLiked ? "Track unliked" : "Track liked",
+      likes: music.likesCount,
       likes: music.likes.length,
       isLiked: !isLiked,
     });
