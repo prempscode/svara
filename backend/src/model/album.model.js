@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const albumSchema = new mongoose.Schema({
-  
+  image: { type: String },
+  imageFileId: { type: String },
   title: {
     type: String,
     required: true,

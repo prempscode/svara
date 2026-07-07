@@ -112,6 +112,8 @@ async function getAllMusics(req, res) {
   }
 }
 
+
+
 async function createAlbum(req, res) {
   // const musicList = await musicModel.find().populate("artist", "name");
 
@@ -192,6 +194,7 @@ async function getAlbumById(req, res) {
 
 module.exports = {
   createMusic,
+  updateMusic,
   createAlbum,
   getAllMusics,
   getAllAlbums,
