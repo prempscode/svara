@@ -173,7 +173,7 @@ async function getAlbumById(req, res) {
       .findById(req.params.id)
       .populate("artist", "username")
       .populate("musics");
-      
+
     if (!album) {
       return res.status(404).json({
         message: "Album not found",
@@ -192,9 +192,53 @@ async function getAlbumById(req, res) {
   }
 }
 
+async function deleteMusic(req, res) {
+  try {
+    const { id } = req.params;
+
+    // find the track
+    const music = await musicModel.findById(id);
+
+    if (!music) {
+      return res.status(404).json({ message: "Music not found" });
+    }
+
+    // check ownership
+    if (music.artist.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can't delete this track" });
+    }
+
+    // delete files from ImageKit
+    try {
+      if (music.audioFileId) {
+        await deleteFile(music.audioFileId);
+      }
+      if (music.imageFileId) {
+        await deleteFile(music.imageFileId);
+      }
+    } catch (imagekitError) {
+      console.error("ImageKit deletion error:", imagekitError.message);
+    }
+
+    // delete from database
+    await musicModel.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Music deleted successfully",
+      musicId: id,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "Error occurred in music.controller",
+      error: e.message,
+    });
+  }
+}
+
 module.exports = {
   createMusic,
   updateMusic,
+  deleteMusic,
   createAlbum,
   getAllMusics,
   getAllAlbums,
