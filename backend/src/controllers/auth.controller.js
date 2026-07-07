@@ -8,18 +8,19 @@ const registerUser = async (req, res) => {
   try {
     const { username, email, password, role = "user" } = req.body;
 
-    // Check if the user already exists
+    // check if the user already exists
     const existingUser = await userModel.findOne({
       $or: [{ username }, { email }],
     });
+
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password
+    // hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
+    // create a new user
     const newUser = new userModel({
       username,
       email,
@@ -42,7 +43,7 @@ const registerUser = async (req, res) => {
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
-        profileImage: newUser.profileImage || null,
+        profileImage: null,
       },
     });
   } catch (error) {
@@ -121,7 +122,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// get any userS public profile (for viewing other users)
+// get any user's public profile (for viewing other users)
 const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -157,9 +158,9 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update username if provided
+    // update username if provided
     if (username) {
-      // Check if username is already taken (by another user)
+      // check if username is already taken (by another user)
       const existingUser = await userModel.findOne({
         username: username,
         _id: { $ne: userId }, // exclude current user
