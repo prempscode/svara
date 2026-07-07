@@ -8,7 +8,9 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-// routes
+// TRACK ROUTES
+
+// upload music
 router.post(
   "/upload",
   authMiddleware.authGlobal,
@@ -19,6 +21,7 @@ router.post(
   musicController.createMusic,
 );
 
+// update music
 router.patch(
   "/:id",
   authMiddleware.authGlobal,
@@ -29,19 +32,58 @@ router.patch(
   musicController.updateMusic,
 );
 
+// delete music
 router.delete("/:id", authMiddleware.authGlobal, musicController.deleteMusic);
 
+// get all music (public feed)
 router.get("/", authMiddleware.authGlobal, musicController.getAllMusics);
 
-// album routes
-router.post("/album", authMiddleware.authGlobal, musicController.createAlbum);
+// get user tracks (profile page)
+router.get(
+  "/user/:userId",
+  authMiddleware.authGlobal,
+  musicController.getUserTracks,
+);
 
+// like / unlike a track
+router.post("/:id/like", authMiddleware.authGlobal, musicController.toggleLike);
+
+// get liked feed
+router.get("/liked", authMiddleware.authGlobal, musicController.getLikedFeed);
+
+// ALBUM ROUTES
+
+// create album
+router.post(
+  "/album",
+  authMiddleware.authGlobal,
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  musicController.createAlbum,
+);
+
+// get all albums
+router.get("/albums", authMiddleware.authGlobal, musicController.getAllAlbums);
+
+// get specific album
 router.get(
   "/albums/:id",
   authMiddleware.authGlobal,
   musicController.getAlbumById,
 );
 
-router.get("/albums", authMiddleware.authGlobal, musicController.getAllAlbums);
+// update album
+router.patch(
+  "/albums/:id",
+  authMiddleware.authGlobal,
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  musicController.updateAlbum,
+);
+
+// delete album
+router.delete(
+  "/albums/:id",
+  authMiddleware.authGlobal,
+  musicController.deleteAlbum,
+);
 
 module.exports = router;
