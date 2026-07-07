@@ -150,7 +150,7 @@ const getUserProfile = async (req, res) => {
 // update user profile (with profile image upload)
 const updateProfile = async (req, res) => {
   try {
-    const { username, email, currentPassword, newPassword } = req.body;
+    const { username } = req.body;
     const userId = req.user.id;
 
     const user = await userModel.findById(userId);
@@ -171,19 +171,6 @@ const updateProfile = async (req, res) => {
       user.username = username;
     }
 
-    // Update email if provided
-    if (email) {
-      // Check if email is already taken (by another user)
-      const existingUser = await userModel.findOne({
-        email: email,
-        _id: { $ne: userId },
-      });
-      if (existingUser) {
-        return res.status(400).json({ message: "Email already taken" });
-      }
-      user.email = email;
-    }
-
     // Update profile image if provided
     const imageFile = req.files?.image?.[0];
     if (imageFile) {
@@ -199,24 +186,6 @@ const updateProfile = async (req, res) => {
       const imageResult = await uploadFile(imageFile);
       user.profileImage = imageResult.url;
       user.profileImageFileId = imageResult.fileId;
-    }
-
-    // Update password if provided
-    if (currentPassword && newPassword) {
-      // Verify current password
-      const isValidPassword = await bcrypt.compare(
-        currentPassword,
-        user.password,
-      );
-      if (!isValidPassword) {
-        return res
-          .status(400)
-          .json({ message: "Current password is incorrect" });
-      }
-
-      // Hash new password
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(newPassword, salt);
     }
 
     await user.save();
