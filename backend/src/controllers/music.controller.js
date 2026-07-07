@@ -112,8 +112,6 @@ async function getAllMusics(req, res) {
   }
 }
 
-
-
 async function createAlbum(req, res) {
   // const musicList = await musicModel.find().populate("artist", "name");
 
@@ -154,7 +152,7 @@ async function getAllAlbums(req, res) {
 
     const albums = await albumModel
       .find()
-      .select("title artist")
+      .select("title artist image")
       .populate("artist", "username");
 
     res.status(201).json({
@@ -173,7 +171,9 @@ async function getAlbumById(req, res) {
   try {
     const album = await albumModel
       .findById(req.params.id)
-      .populate("artist", "username");
+      .populate("artist", "username")
+      .populate("musics");
+      
     if (!album) {
       return res.status(404).json({
         message: "Album not found",
