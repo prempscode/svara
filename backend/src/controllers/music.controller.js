@@ -259,7 +259,39 @@ async function getUserTracks(req, res) {
   }
 }
 
+async function toggleLike(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
 
+    const music = await musicModel.findById(id);
+    if (!music) {
+      return res.status(404).json({ message: "Music not found" });
+    }
+
+    const likeIndex = music.likes.indexOf(userId);
+    const isLiked = likeIndex !== -1;
+
+    if (isLiked) {
+      music.likes.splice(likeIndex, 1);
+    } else {
+      music.likes.push(userId);
+    }
+
+    await music.save();
+
+    res.status(200).json({
+      message: isLiked ? "Track unliked" : "Track liked",
+      likes: music.likes.length,
+      isLiked: !isLiked,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
 
 module.exports = {
   createMusic,
