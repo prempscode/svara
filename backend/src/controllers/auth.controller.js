@@ -118,7 +118,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// Get any user's public profile (for viewing other users)
+// Get any userS public profile (for viewing other users)
 const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
