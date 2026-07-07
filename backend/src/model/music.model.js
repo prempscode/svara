@@ -12,6 +12,8 @@ const musicSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    audioFileId: { type: String },
+    imageFileId: { type: String },
     title: {
       type: String,
       required: true,
