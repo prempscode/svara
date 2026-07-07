@@ -37,6 +37,52 @@ async function createMusic(req, res) {
 }
 
 
+async function updateMusic(req, res) {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    const music = await musicModel.findById(id);
+
+    if (!music) {
+      return res.status(404).json({ message: "Music not found" });
+    }
+
+    // ownership check — only the uploader can edit
+    if (music.artist.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can't edit this track" });
+    }
+
+    if (title) music.title = title;
+    if (description) music.description = description;
+
+    const newImageFile = req.files?.image?.[0];
+    const newAudioFile = req.files?.audio?.[0];
+
+    if (newImageFile) {
+      if (music.imageFileId) await deleteFile(music.imageFileId); // remove old one
+      const imageResult = await uploadFile(newImageFile);
+      music.image = imageResult.url;
+      music.imageFileId = imageResult.fileId;
+    }
+
+    if (newAudioFile) {
+      if (music.audioFileId) await deleteFile(music.audioFileId);
+      const audioResult = await uploadFile(newAudioFile);
+      music.uri = audioResult.url;
+      music.audioFileId = audioResult.fileId;
+    }
+
+    await music.save();
+
+    res.status(200).json({ message: "Music updated successfully", music });
+  } catch (e) {
+    res.status(500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
 
 
 
