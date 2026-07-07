@@ -118,6 +118,15 @@ async function createAlbum(req, res) {
   try {
     const { title, musics } = req.body;
 
+    const musicDocs = await musicModel.find({
+      _id: { $in: musics },
+      artist: req.user.id,
+    });
+    if (musicDocs.length !== musics.length) {
+      return res.status(400).json({
+        message: "One or more tracks don't exist or don't belong to you",
+      });
+    }
     const album = await albumModel.create({
       title,
       artist: req.user.id,
@@ -319,6 +328,56 @@ async function getLikedFeed(req, res) {
         total,
         pages: Math.ceil(total / limit),
       },
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
+
+async function updateAlbum(req, res) {
+  try {
+    const { id } = req.params;
+    const { title, description, musics } = req.body;
+
+    const album = await albumModel.findById(id);
+    if (!album) {
+      return res.status(404).json({ message: "Album not found" });
+    }
+
+    if (album.artist.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can't edit this album" });
+    }
+    const musicDocs = await musicModel.find({
+      _id: { $in: musics },
+      artist: req.user.id,
+    });
+    if (musicDocs.length !== musics.length) {
+      return res.status(400).json({
+        message: "One or more tracks don't exist or don't belong to you",
+      });
+    }
+    album.musics = musics;
+
+    if (title) album.title = title;
+    if (description) album.description = description;
+
+    // Handle album cover update
+    const imageFile = req.files?.image?.[0];
+    if (imageFile) {
+      if (album.imageFileId) await deleteFile(album.imageFileId);
+      const imageResult = await uploadFile(imageFile);
+      album.image = imageResult.url;
+      album.imageFileId = imageResult.fileId;
+    }
+
+    await album.save();
+
+    res.status(200).json({
+      message: "Album updated successfully",
+      album,
     });
   } catch (e) {
     res.status(500).json({
