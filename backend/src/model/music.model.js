@@ -18,6 +18,7 @@ const musicSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    likesCount: { type: Number, default: 0 },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
