@@ -1,5 +1,5 @@
 const musicModel = require("../model/music.model");
-const { uploadFile,deleteFile } = require("../services/storage.service");
+const { uploadFile, deleteFile } = require("../services/storage.service");
 const albumModel = require("../model/album.model");
 const jwt = require("jsonwebtoken");
 
@@ -234,6 +234,32 @@ async function deleteMusic(req, res) {
     });
   }
 }
+
+async function getUserTracks(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const [musics, total] = await Promise.all([
+      musicModel
+        .find({ artist: userId })
+        .populate("artist", "username")
+        .sort({ createdAt: -1 }),
+      musicModel.countDocuments({ artist: userId }),
+    ]);
+
+    res.status(200).json({
+      message: "User tracks fetched successfully",
+      musics: musics,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "error occured in music.controller",
+      error: e.message,
+    });
+  }
+}
+
+
 
 module.exports = {
   createMusic,
