@@ -10,7 +10,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-// ============ AUTH ROUTES ============
+//  AUTH ROUTES
 
 // register
 router.post("/register", authController.registerUser);
