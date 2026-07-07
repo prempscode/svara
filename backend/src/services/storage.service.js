@@ -15,3 +15,9 @@ async function uploadFile(file) {
 }
 
 module.exports = { uploadFile };
+
+/*
+ **Why mimetype instead of filename?**
+Filename is just text — easy to fake (rename `virus.exe` to `song.mp3`). 
+Mimetype comes from the browser itself when the file is picked, so it's a more trustworthy signal of what the file actually is.
+ */
