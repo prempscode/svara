@@ -3,6 +3,7 @@ const userModel = require("../model/user.model");
 const jwt = require("jsonwebtoken");
 const { uploadFile, deleteFile } = require("../services/storage.service");
 
+// register
 const registerUser = async (req, res) => {
   try {
     const { username, email, password, role = "user" } = req.body;
@@ -49,6 +50,7 @@ const registerUser = async (req, res) => {
   }
 };
 
+// login
 const loginUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -88,6 +90,7 @@ const loginUser = async (req, res) => {
   }
 };
 
+// logout
 const logoutUser = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({
@@ -97,7 +100,7 @@ const logoutUser = async (req, res) => {
 
 // USER PROFILE FUNCTIONS
 
-// Get own profile
+// get own profile
 const getProfile = async (req, res) => {
   try {
     const user = await userModel.findById(req.user.id).select("-password");
@@ -118,7 +121,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// Get any userS public profile (for viewing other users)
+// get any userS public profile (for viewing other users)
 const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -143,7 +146,7 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// Update user profile (with profile image upload)
+// update user profile (with profile image upload)
 const updateProfile = async (req, res) => {
   try {
     const { username, email, currentPassword, newPassword } = req.body;
@@ -233,7 +236,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Delete user account
+// delete user account
 const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
