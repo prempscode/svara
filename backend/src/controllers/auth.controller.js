@@ -2,48 +2,103 @@ const bcrypt = require("bcrypt");
 const userModel = require("../model/user.model");
 const jwt = require("jsonwebtoken");
 const { uploadFile, deleteFile } = require("../services/storage.service");
+const { generateOTP, sendOTPEmail } = require("../services/email.service");
 
-// register
+// registration
 const registerUser = async (req, res) => {
   try {
     const { username, email, password, role = "user" } = req.body;
 
-    // check if the user already exists
+    // Check if user exists
     const existingUser = await userModel.findOne({
       $or: [{ username }, { email }],
     });
-
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // hash the password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create a new user
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Create user (unverified)
     const newUser = new userModel({
       username,
       email,
       password: hashedPassword,
       role,
+      otp,
+      otpExpiry,
+      isVerified: false,
     });
 
     await newUser.save();
 
+    // Send OTP email
+    await sendOTPEmail(email, otp);
+
+    res.status(201).json({
+      message: "User registered! Please verify your email with OTP.",
+      userId: newUser._id,
+      // Don't send token yet - user needs to verify first
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Verify OTP
+const verifyOTP = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if already verified
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // Check OTP expiry
+    if (new Date() > user.otpExpiry) {
+      return res
+        .status(400)
+        .json({ message: "OTP expired. Please request a new one." });
+    }
+
+    // Check OTP match
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Mark as verified
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    // Generate token after verification
     const token = jwt.sign(
-      { id: newUser._id, role: newUser.role },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
     );
-
     res.cookie("token", token);
-    res.status(201).json({
-      message: "User registered successfully",
+
+    res.status(200).json({
+      message: "Email verified successfully!",
       user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-        profileImage: null,
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        profileImage: user.profileImage || null,
       },
     });
   } catch (error) {
@@ -51,29 +106,66 @@ const registerUser = async (req, res) => {
   }
 };
 
-// login
+// Resend OTP
+const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+
+    // Send new OTP
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({
+      message: "New OTP sent to your email",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// login - check if verified
 const loginUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if the user exists
     const user = await userModel.findOne({ $or: [{ email }, { username }] });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Compare the password
+    // ✅ Check if email is verified
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Please verify your email first. Check your inbox for OTP.",
+        userId: user._id,
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Create a JWT token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
     );
-
     res.cookie("token", token);
 
     res.status(200).json({
@@ -83,6 +175,7 @@ const loginUser = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        isVerified: user.isVerified,
         profileImage: user.profileImage || null,
       },
     });
@@ -260,6 +353,8 @@ module.exports = {
   registerUser,
   loginUser,
   logoutUser,
+  resendOTP,
+  verifyOTP,
   getProfile,
   getUserProfile,
   updateProfile,

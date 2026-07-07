@@ -15,6 +15,12 @@ const upload = multer({
 // register
 router.post("/register", authController.registerUser);
 
+// Verify OTP
+router.post("/verify-otp", authController.verifyOTP);
+
+// Resend OTP
+router.post("/resend-otp", authController.resendOTP);
+
 // login
 router.post("/login", authController.loginUser);
 
