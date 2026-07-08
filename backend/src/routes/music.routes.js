@@ -6,6 +6,20 @@ const authMiddleware = require("../middlewares/auth.middleware");
 
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept audio and image files
+    if (
+      file.mimetype.startsWith("audio/") ||
+      file.mimetype.startsWith("image/")
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only audio and image files are allowed"), false);
+    }
+  },
 });
 
 // TRACK ROUTES

@@ -1,10 +1,12 @@
+// src/pages/EditTrack.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Music, Image, X, Trash2 } from "lucide-react";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
 
 export default function EditTrack() {
-  const { id } = useParams(); // Get track ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -18,12 +20,13 @@ export default function EditTrack() {
   const [audioPreview, setAudioPreview] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Fetch track data when page loads
+  // Fetch track data
   useEffect(() => {
     const fetchTrack = async () => {
       try {
-        const response = await api.get(`/music/${id}`);
+        const response = await api.get(`/music/track/${id}`);
         const track = response.data.music;
         setFormData({
           title: track.title,
@@ -35,7 +38,7 @@ export default function EditTrack() {
         console.error("Error fetching track:", error);
         setError("Track not found or you don't have permission to edit it");
         if (error.response?.status === 404) {
-          navigate("/home");
+          navigate("/profile");
         }
       } finally {
         setLoading(false);
@@ -64,6 +67,7 @@ export default function EditTrack() {
     }
   };
 
+  // ✅ UPDATE TRACK
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -85,31 +89,32 @@ export default function EditTrack() {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Update success:", response.data);
-      navigate("/profile"); // Go back to profile
+      console.log("✅ Track updated:", response.data);
+      navigate("/profile");
     } catch (error) {
+      console.error("❌ Update error:", error);
       setError(error.response?.data?.message || "Update failed");
-      console.error("Update error:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ✅ DELETE TRACK
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this track?")) {
-      try {
-        await api.delete(`/music/${id}`);
-        navigate("/profile");
-      } catch (error) {
-        alert(error.response?.data?.message || "Delete failed");
-      }
+    try {
+      await api.delete(`/music/${id}`);
+      console.log("✅ Track deleted");
+      navigate("/profile");
+    } catch (error) {
+      console.error("❌ Delete error:", error);
+      alert(error.response?.data?.message || "Delete failed");
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white/40">Loading...</div>
       </div>
     );
   }
@@ -117,121 +122,219 @@ export default function EditTrack() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
-      <div className="pt-20 px-6 max-w-2xl mx-auto pb-24">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">✏️ Edit Track</h1>
+      <div className="pt-24 px-6 max-w-2xl mx-auto pb-32">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/profile")}
+              className="text-white/40 hover:text-white transition"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-3xl font-bold text-white">✏️ Edit Track</h1>
+          </div>
+
+          {/* ✅ DELETE BUTTON */}
           <button
-            onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 px-4 py-2 rounded-xl transition"
           >
-            Delete Track
+            <Trash2 className="w-5 h-5" />
+            Delete
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6">
             {error}
           </div>
         )}
 
+        {/* ✅ UPDATE FORM */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>
-            <label className="text-gray-300 block mb-2">Track Title *</label>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Track Title *
+            </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full bg-white/5 text-white placeholder:text-white/30 px-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="text-gray-300 block mb-2">Description</label>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Description
+            </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows="3"
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500 resize-none"
+              className="w-full bg-white/5 text-white placeholder:text-white/30 px-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition resize-none"
             />
           </div>
 
-          {/* Current Image Preview */}
+          {/* Current Image */}
           {currentImage && !imageFile && (
             <div>
-              <label className="text-gray-300 block mb-2">Current Cover</label>
+              <label className="text-white/60 text-sm font-medium block mb-2">
+                Current Cover
+              </label>
               <img
                 src={currentImage}
                 alt="Current cover"
-                className="w-32 h-32 object-cover rounded-lg"
+                className="w-32 h-32 object-cover rounded-xl"
               />
             </div>
           )}
 
-          {/* Image File */}
+          {/* New Image */}
           <div>
-            <label className="text-gray-300 block mb-2">New Cover Image (Optional)</label>
-            <div className="bg-gray-800 rounded-lg p-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
-              />
-              {imagePreview && (
-                <div className="mt-3">
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              New Cover Image (Optional)
+            </label>
+            <div className="bg-white/5 rounded-xl p-6 border-2 border-dashed border-white/10 hover:border-red-500/30 transition">
+              {!imagePreview ? (
+                <label className="flex flex-col items-center justify-center cursor-pointer">
+                  <Image className="w-12 h-12 text-white/20 mb-3" />
+                  <span className="text-white/40 text-sm">
+                    Click to upload image
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center justify-between">
                   <img
                     src={imagePreview}
                     alt="New cover preview"
-                    className="w-32 h-32 object-cover rounded-lg"
+                    className="w-20 h-20 object-cover rounded-xl"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="text-white/30 hover:text-red-500 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Audio File */}
+          {/* Audio */}
           <div>
-            <label className="text-gray-300 block mb-2">New Audio File (Optional)</label>
-            <div className="bg-gray-800 rounded-lg p-4">
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={handleAudioChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
-              />
-              {audioPreview && (
-                <div className="mt-3">
-                  <audio controls className="w-full">
-                    <source src={audioPreview} />
-                  </audio>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              New Audio File (Optional)
+            </label>
+            <div className="bg-white/5 rounded-xl p-6 border-2 border-dashed border-white/10 hover:border-red-500/30 transition">
+              {!audioFile ? (
+                <label className="flex flex-col items-center justify-center cursor-pointer">
+                  <Music className="w-12 h-12 text-white/20 mb-3" />
+                  <span className="text-white/40 text-sm">
+                    Click to upload audio
+                  </span>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Music className="w-6 h-6 text-red-500" />
+                    <span className="text-white text-sm">{audioFile.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAudioFile(null);
+                      setAudioPreview(null);
+                    }}
+                    className="text-white/30 hover:text-red-500 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
+            {audioPreview && !audioFile && (
+              <div className="mt-3">
+                <audio controls className="w-full">
+                  <source src={audioPreview} />
+                </audio>
+              </div>
+            )}
           </div>
 
-          {/* Submit Button */}
+          {/* ✅ UPDATE BUTTON */}
           <div className="flex gap-4">
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-xl transition disabled:opacity-50"
             >
               {submitting ? "Updating..." : "Update Track"}
             </button>
             <button
               type="button"
               onClick={() => navigate("/profile")}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+              className="px-6 bg-white/5 hover:bg-white/10 text-white font-semibold py-4 rounded-xl transition"
             >
               Cancel
             </button>
           </div>
         </form>
+
+        {/* ✅ DELETE CONFIRMATION MODAL */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div className="bg-gray-900 p-6 rounded-xl max-w-md w-full">
+              <h3 className="text-xl font-bold text-white mb-2">
+                Delete Track?
+              </h3>
+              <p className="text-white/60 mb-6">
+                Are you sure you want to delete "
+                <span className="text-white">{formData.title}</span>"?
+                <br />
+                <span className="text-red-400 text-sm">
+                  This action cannot be undone!
+                </span>
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl transition"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-white py-3 rounded-xl transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

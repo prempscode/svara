@@ -41,6 +41,10 @@ async function updateMusic(req, res) {
     const { id } = req.params;
     const { title, description } = req.body;
 
+    console.log("📝 Updating music:", id);
+    console.log("📋 Body:", { title, description });
+    console.log("📎 Files:", req.files);
+
     const music = await musicModel.findById(id);
 
     if (!music) {
@@ -52,32 +56,65 @@ async function updateMusic(req, res) {
       return res.status(403).json({ message: "You can't edit this track" });
     }
 
+    // Update text fields
     if (title) music.title = title;
     if (description) music.description = description;
 
+    // ✅ Handle image upload - check if files exist properly
     const newImageFile = req.files?.image?.[0];
     const newAudioFile = req.files?.audio?.[0];
 
     if (newImageFile) {
-      if (music.imageFileId) await deleteFile(music.imageFileId); // remove old one
-      const imageResult = await uploadFile(newImageFile);
-      music.image = imageResult.url;
-      music.imageFileId = imageResult.fileId;
+      console.log("🖼️ Updating image...");
+      try {
+        // Delete old image if exists
+        if (music.imageFileId) {
+          await deleteFile(music.imageFileId);
+          console.log("✅ Old image deleted");
+        }
+        // Upload new image
+        const imageResult = await uploadFile(newImageFile);
+        music.image = imageResult.url;
+        music.imageFileId = imageResult.fileId;
+        console.log("✅ New image uploaded:", imageResult.fileId);
+      } catch (imgError) {
+        console.error("❌ Image upload error:", imgError.message);
+        // Continue with other updates
+      }
     }
 
     if (newAudioFile) {
-      if (music.audioFileId) await deleteFile(music.audioFileId);
-      const audioResult = await uploadFile(newAudioFile);
-      music.uri = audioResult.url;
-      music.audioFileId = audioResult.fileId;
+      console.log("🎵 Updating audio...");
+      try {
+        // Delete old audio if exists
+        if (music.audioFileId) {
+          await deleteFile(music.audioFileId);
+          console.log("✅ Old audio deleted");
+        }
+        // Upload new audio
+        const audioResult = await uploadFile(newAudioFile);
+        music.uri = audioResult.url;
+        music.audioFileId = audioResult.fileId;
+        console.log("✅ New audio uploaded:", audioResult.fileId);
+      } catch (audioError) {
+        console.error("❌ Audio upload error:", audioError.message);
+        // Continue with other updates
+      }
     }
 
     await music.save();
 
-    res.status(200).json({ message: "Music updated successfully", music });
+    console.log("✅ Music updated:", music._id);
+
+    res.status(200).json({
+      message: "Music updated successfully",
+      music,
+    });
   } catch (e) {
+    console.error("❌ Error in updateMusic:", e.message);
+    console.error("❌ Full error:", e);
     res.status(500).json({
-      message: "error occured in music.controller",
+      message: "Error occurred in music.controller",
       error: e.message,
     });
   }
