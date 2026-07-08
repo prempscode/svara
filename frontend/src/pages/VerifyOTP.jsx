@@ -16,9 +16,11 @@ export default function VerifyOTP() {
     setError("");
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await api.post("/auth/verify-otp", { userId, otp });
+
+      localStorage.setItem("isLoggedIn", "true");
       localStorage.removeItem("tempUserId");
-      localStorage.setItem("token", response.data.token);
       navigate("/home");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid OTP");

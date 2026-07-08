@@ -21,6 +21,13 @@ router.post(
   musicController.createMusic,
 );
 
+// Get single track by ID
+router.get(
+  "/track/:id",
+  authMiddleware.authGlobal,
+  musicController.getMusicById,
+);
+
 // update music
 router.patch(
   "/:id",

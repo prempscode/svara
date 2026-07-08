@@ -1,18 +1,16 @@
-const { ImageKit } = require("@imagekit/nodejs");
+const { ImageKit, toFile } = require("@imagekit/nodejs");
 
 const ImageKitClient = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 });
 
 async function uploadFile(file) {
-
   const isAudio = file.mimetype.startsWith("audio/");
-
   const folder = isAudio ? "svara/audio" : "svara/image";
   const prefix = isAudio ? "music" : "image";
 
   const result = await ImageKitClient.files.upload({
-    file: file.buffer,
+    file: await toFile(file.buffer, file.originalname, { type: file.mimetype }),
     fileName: `${prefix}_${Date.now()}`,
     folder,
   });

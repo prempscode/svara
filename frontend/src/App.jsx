@@ -1,23 +1,25 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VerifyOTP from './pages/VerifyOTP';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Liked from './pages/Liked';
-import Upload from './pages/Upload';
-import EditTrack from './pages/EditTrack';
-import Albums from './pages/Albums';
-import AlbumDetail from './pages/AlbumDetail';
-import CreateAlbum from './pages/CreateAlbum';
-import EditAlbum from './pages/EditAlbum';
-import UserProfile from './pages/UserProfile';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import VerifyOTP from "./pages/VerifyOTP";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import Liked from "./pages/Liked";
+import Upload from "./pages/Upload";
+import EditTrack from "./pages/EditTrack";
+import Albums from "./pages/Albums";
+import AlbumDetail from "./pages/AlbumDetail";
+import CreateAlbum from "./pages/CreateAlbum";
+import EditAlbum from "./pages/EditAlbum";
+import UserProfile from "./pages/UserProfile";
+import Player from "./pages/Player"; // ✅ ADD THIS
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/home" element={<Home />} />
@@ -30,6 +32,7 @@ function App() {
         <Route path="/create-album" element={<CreateAlbum />} />
         <Route path="/edit-album/:id" element={<EditAlbum />} />
         <Route path="/user/:userId" element={<UserProfile />} />
+        <Route path="/player/:id" element={<Player />} /> 
       </Routes>
     </BrowserRouter>
   );

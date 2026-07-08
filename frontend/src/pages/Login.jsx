@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Music2 } from "lucide-react";
@@ -17,7 +16,10 @@ export default function Login() {
 
     try {
       const response = await api.post("/auth/login", formData);
-      localStorage.setItem("token", response.data.token);
+
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
       navigate("/home");
     } catch (error) {
       setError(error.response?.data?.message || "Login failed");

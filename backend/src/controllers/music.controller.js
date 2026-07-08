@@ -113,38 +113,56 @@ async function getAllMusics(req, res) {
 }
 
 async function createAlbum(req, res) {
-  // const musicList = await musicModel.find().populate("artist", "name");
-
   try {
-    const { title, musics } = req.body;
+    const { title, description, musics } = req.body;
+    console.log("📀 Creating album with:", { title, description, musics });
 
-    const musicDocs = await musicModel.find({
-      _id: { $in: musics },
-      artist: req.user.id,
-    });
-    if (musicDocs.length !== musics.length) {
-      return res.status(400).json({
-        message: "One or more tracks don't exist or don't belong to you",
-      });
+    // Validate required fields
+    if (!title) {
+      return res.status(400).json({ message: "Album title is required" });
     }
+
+    // Parse musics if it's a string (sent as JSON string from FormData)
+    let musicIds = [];
+    if (musics) {
+      try {
+        musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
+      } catch (e) {
+        console.error("❌ Error parsing musics:", e);
+        return res.status(400).json({ message: "Invalid tracks format" });
+      }
+    }
+
+    // Handle album cover image (optional)
+    const imageFile = req.files?.image?.[0];
+    let imageResult = null;
+    if (imageFile) {
+      console.log("🖼️ Uploading album cover...");
+      imageResult = await uploadFile(imageFile);
+      console.log("✅ Album cover uploaded:", imageResult.fileId);
+    }
+
+    // Create album
     const album = await albumModel.create({
       title,
+      description: description || "",
       artist: req.user.id,
-      musics: musics,
+      musics: musicIds || [],
+      image: imageResult?.url,
+      imageFileId: imageResult?.fileId,
     });
+
+    console.log("✅ Album created:", album._id);
 
     res.status(201).json({
       message: "Album created successfully",
-      album: {
-        id: album._id,
-        title: album.title,
-        artist: album.artist,
-        musics: album.musics,
-      },
+      album: album,
     });
   } catch (e) {
+    console.error("❌ Error in createAlbum:", e.message);
+    console.error("❌ Full error:", e);
     res.status(500).json({
-      message: "error occured in music.controller",
+      message: "Error occurred in music.controller",
       error: e.message,
     });
   }
@@ -176,26 +194,37 @@ async function getAllAlbums(req, res) {
   }
 }
 
+// Get Album by ID
 async function getAlbumById(req, res) {
   try {
+    const { id } = req.params;
+    console.log("🔍 Fetching album:", id);
+
     const album = await albumModel
-      .findById(req.params.id)
-      .populate("artist", "username")
-      .populate("musics");
+      .findById(id)
+      .populate("artist", "username email")
+      .populate({
+        path: "musics",
+        populate: {
+          path: "artist",
+          select: "username email",
+        },
+      });
 
     if (!album) {
-      return res.status(404).json({
-        message: "Album not found",
-      });
+      return res.status(404).json({ message: "Album not found" });
     }
 
-    res.status(201).json({
+    console.log("✅ Album found:", album._id);
+
+    res.status(200).json({
       message: "Album fetched successfully",
       album: album,
     });
   } catch (e) {
-    res.status(e.status || 500).json({
-      message: "error occured in music.controller",
+    console.error("❌ Error in getAlbumById:", e.message);
+    res.status(500).json({
+      message: "Error occurred in music.controller",
       error: e.message,
     });
   }
@@ -282,24 +311,26 @@ async function toggleLike(req, res) {
     const isLiked = likeIndex !== -1;
 
     if (isLiked) {
+      // Unlike: Remove user ID
       music.likes.splice(likeIndex, 1);
-      music.likesCount = music.likes.length;
     } else {
+      // Like: Add user ID
       music.likes.push(userId);
-      music.likesCount = music.likes.length;
     }
 
+    // Update likesCount
+    music.likesCount = music.likes.length;
     await music.save();
 
+    // ✅ Return consistent response
     res.status(200).json({
       message: isLiked ? "Track unliked" : "Track liked",
-      likes: music.likesCount,
       likes: music.likes.length,
-      isLiked: !isLiked,
+      isLiked: !isLiked, // Send the new status
     });
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
+      message: "Error occurred in music.controller",
       error: e.message,
     });
   }
@@ -340,51 +371,74 @@ async function getLikedFeed(req, res) {
   }
 }
 
+// Update Album
 async function updateAlbum(req, res) {
   try {
     const { id } = req.params;
     const { title, description, musics } = req.body;
 
+    console.log("📀 Updating album:", id);
+    console.log("📋 Data:", { title, description, musics });
+
+    // Find album
     const album = await albumModel.findById(id);
     if (!album) {
       return res.status(404).json({ message: "Album not found" });
     }
 
+    // Check ownership
     if (album.artist.toString() !== req.user.id) {
       return res.status(403).json({ message: "You can't edit this album" });
     }
-    const musicDocs = await musicModel.find({
-      _id: { $in: musics },
-      artist: req.user.id,
-    });
-    if (musicDocs.length !== musics.length) {
-      return res.status(400).json({
-        message: "One or more tracks don't exist or don't belong to you",
-      });
-    }
-    album.musics = musics;
 
+    // Parse musics if it's a string
+    let musicIds = [];
+    if (musics) {
+      try {
+        musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
+      } catch (e) {
+        console.error("❌ Error parsing musics:", e);
+        return res.status(400).json({ message: "Invalid tracks format" });
+      }
+    }
+
+    // Update fields
     if (title) album.title = title;
     if (description) album.description = description;
+    if (musicIds.length > 0) album.musics = musicIds;
 
     // Handle album cover update
     const imageFile = req.files?.image?.[0];
     if (imageFile) {
-      if (album.imageFileId) await deleteFile(album.imageFileId);
+      console.log("🖼️ Updating album cover...");
+      // Delete old image
+      if (album.imageFileId) {
+        try {
+          await deleteFile(album.imageFileId);
+        } catch (error) {
+          console.error("Error deleting old image:", error.message);
+        }
+      }
+      // Upload new image
       const imageResult = await uploadFile(imageFile);
       album.image = imageResult.url;
       album.imageFileId = imageResult.fileId;
+      console.log("✅ Album cover updated:", imageResult.fileId);
     }
 
     await album.save();
 
+    console.log("✅ Album updated:", album._id);
+
     res.status(200).json({
       message: "Album updated successfully",
-      album,
+      album: album,
     });
   } catch (e) {
+    console.error("❌ Error in updateAlbum:", e.message);
+    console.error("❌ Full error:", e);
     res.status(500).json({
-      message: "error occured in music.controller",
+      message: "Error occurred in music.controller",
       error: e.message,
     });
   }
@@ -426,7 +480,32 @@ async function deleteAlbum(req, res) {
   }
 }
 
+async function getMusicById(req, res) {
+  try {
+    const { id } = req.params;
+
+    const music = await musicModel
+      .findById(id)
+      .populate("artist", "username email profileImage");
+
+    if (!music) {
+      return res.status(404).json({ message: "Music not found" });
+    }
+
+    res.status(200).json({
+      message: "Music fetched successfully",
+      music: music,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "Error occurred in music.controller",
+      error: e.message,
+    });
+  }
+}
+
 module.exports = {
+  getMusicById,
   createMusic,
   updateMusic,
   deleteMusic,

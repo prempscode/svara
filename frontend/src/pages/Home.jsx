@@ -4,14 +4,20 @@ import { Link } from "react-router-dom";
 import { Heart, Play, Music2 } from "lucide-react";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleTrackClick = (trackId) => {
+    navigate(`/player/${trackId}`);
+  };
+
   const fetchTracks = async () => {
     try {
-      const response = await api.get('/music');
+      const response = await api.get("/music");
       setTracks(response.data.musics);
     } catch (error) {
       console.error("Error fetching tracks:", error);
@@ -64,7 +70,11 @@ export default function Home() {
         {/* Track Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {tracks.map((track) => (
-            <div key={track._id} className="group cursor-pointer">
+            <div
+              key={track._id}
+              onClick={() => handleTrackClick(track._id)}
+              className="group cursor-pointer"
+            >
               <div className="relative aspect-square rounded-xl overflow-hidden bg-white/5">
                 <img
                   src={
