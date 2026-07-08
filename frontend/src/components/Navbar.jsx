@@ -1,5 +1,17 @@
-import { useState } from "react";
+// src/components/Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  Home,
+  Heart,
+  Album,
+  Upload,
+  User,
+  LogOut,
+  Music2,
+  Menu,
+  X,
+} from "lucide-react";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -11,63 +23,66 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { to: "/home", label: "Home", icon: "🏠" },
-    { to: "/liked", label: "Liked", icon: "❤️" },
-    { to: "/albums", label: "Albums", icon: "📀" },
-    { to: "/upload", label: "Upload", icon: "📤" },
-    { to: "/profile", label: "Profile", icon: "👤" },
+    { to: "/home", label: "Browse", icon: Home },
+    { to: "/liked", label: "Liked", icon: Heart },
+    { to: "/albums", label: "Albums", icon: Album },
+    { to: "/upload", label: "Upload", icon: Upload },
+    { to: "/profile", label: "Profile", icon: User },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur-md border-b border-gray-800 z-50 px-4 py-3">
+    <nav className="fixed top-0 left-0 right-0 bg-black/90 backdrop-blur-xl border-b border-white/10 z-50 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link
-          to="/home"
-          className="text-2xl font-bold text-white flex items-center gap-2 hover:text-green-500 transition"
-        >
-          🎵 Svara
+        <Link to="/home" className="flex items-center gap-2 group">
+          <Music2 className="w-7 h-7 text-red-500 group-hover:scale-110 transition" />
+          <span className="text-2xl font-bold text-white tracking-tight">
+            Svara
+          </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <Link
-              key={link.to}
-              to={link.to}
-              className="text-gray-300 hover:text-white transition text-sm"
+              key={to}
+              to={to}
+              className="flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-medium"
             >
-              {link.icon} {link.label}
+              <Icon className="w-4 h-4" />
+              {label}
             </Link>
           ))}
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition"
+            className="flex items-center gap-2 text-white/50 hover:text-red-500 transition text-sm font-medium"
           >
+            <LogOut className="w-4 h-4" />
             Logout
           </button>
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile Menu Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white text-2xl"
+          className="md:hidden text-white"
         >
-          {isOpen ? "✕" : "☰"}
+          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden mt-3 pt-3 border-t border-gray-800 space-y-2">
-          {navLinks.map((link) => (
+        <div className="md:hidden mt-3 pt-3 border-t border-white/10 space-y-3">
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <Link
-              key={link.to}
-              to={link.to}
+              key={to}
+              to={to}
               onClick={() => setIsOpen(false)}
-              className="block text-gray-300 hover:text-white transition text-sm py-2 px-3 hover:bg-gray-800 rounded"
+              className="flex items-center gap-3 text-white/70 hover:text-white transition py-2 px-3 hover:bg-white/5 rounded-xl"
             >
-              {link.icon} {link.label}
+              <Icon className="w-5 h-5" />
+              {label}
             </Link>
           ))}
           <button
@@ -75,9 +90,10 @@ export default function Navbar() {
               setIsOpen(false);
               handleLogout();
             }}
-            className="w-full text-left text-red-400 hover:text-red-300 transition text-sm py-2 px-3 hover:bg-gray-800 rounded"
+            className="flex items-center gap-3 text-red-500 hover:text-red-400 transition py-2 px-3 hover:bg-white/5 rounded-xl w-full"
           >
-            🚪 Logout
+            <LogOut className="w-5 h-5" />
+            Logout
           </button>
         </div>
       )}

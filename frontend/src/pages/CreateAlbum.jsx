@@ -103,7 +103,7 @@ export default function CreateAlbum() {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
               required
             />
           </div>
@@ -116,7 +116,7 @@ export default function CreateAlbum() {
               value={formData.description}
               onChange={handleChange}
               rows="3"
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500 resize-none"
+              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500 resize-none"
             />
           </div>
 
@@ -128,7 +128,7 @@ export default function CreateAlbum() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
+                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
               />
               {imagePreview && (
                 <div className="mt-3">
@@ -161,7 +161,7 @@ export default function CreateAlbum() {
                       type="checkbox"
                       checked={selectedTracks.includes(track._id)}
                       onChange={() => {}}
-                      className="w-5 h-5 accent-green-600"
+                      className="w-5 h-5 accent-red-600"
                     />
                     <img
                       src={track.image || "https://picsum.photos/40"}
@@ -182,7 +182,7 @@ export default function CreateAlbum() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Album 🚀"}
           </button>

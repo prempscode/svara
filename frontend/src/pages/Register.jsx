@@ -55,7 +55,7 @@ export default function Register() {
             placeholder="Username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
             required
           />
           <input
@@ -64,7 +64,7 @@ export default function Register() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
             required
           />
           <input
@@ -73,7 +73,7 @@ export default function Register() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
             required
           />
 
@@ -83,7 +83,7 @@ export default function Register() {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="user">Listen to music 🎧</option>
               <option value="artist">Upload my music 🎵</option>
@@ -93,7 +93,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -101,7 +101,7 @@ export default function Register() {
 
         <p className="text-gray-400 text-center mt-4">
           Already have an account?{" "}
-          <Link to="/" className="text-green-500 hover:underline">
+          <Link to="/" className="text-red-500 hover:underline">
             Sign In
           </Link>
         </p>

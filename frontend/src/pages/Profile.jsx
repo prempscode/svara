@@ -88,7 +88,7 @@ export default function Profile() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl text-white bg-gradient-to-br from-green-600 to-blue-600">
+              <div className="w-full h-full flex items-center justify-center text-4xl text-white bg-gradient-to-br from-red-600 to-black">
                 {user?.username?.[0]?.toUpperCase()}
               </div>
             )}
@@ -100,11 +100,11 @@ export default function Profile() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
                 />
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg"
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg"
                 >
                   Save
                 </button>
@@ -124,7 +124,7 @@ export default function Profile() {
                 <p className="text-gray-500 text-sm mt-1">Role: {user?.role}</p>
                 <button
                   onClick={() => setEditMode(true)}
-                  className="text-green-500 hover:underline mt-2"
+                  className="text-red-500 hover:underline mt-2"
                 >
                   Edit Profile
                 </button>

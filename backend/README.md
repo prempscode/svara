@@ -1,6 +1,6 @@
-# 🎵 Spotify Backend
+# 🎵 svara Backend
 
-A full-featured REST API backend inspired by Spotify, built with **Node.js**, **Express**, and **MongoDB**. This project focuses on **Role-Based Authentication & Authorization**, allowing Artists and Users to have different levels of access.
+A full-featured REST API backend inspired by svara, built with **Node.js**, **Express**, and **MongoDB**. This project focuses on **Role-Based Authentication & Authorization**, allowing Artists and Users to have different levels of access.
 
 ---
 

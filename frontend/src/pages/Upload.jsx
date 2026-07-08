@@ -1,15 +1,14 @@
+// src/pages/Upload.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Upload as UploadIcon, Music, Image, X } from "lucide-react";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
 
 export default function Upload() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-  });
+  const [formData, setFormData] = useState({ title: "", description: "" });
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [audioPreview, setAudioPreview] = useState(null);
@@ -41,33 +40,25 @@ export default function Upload() {
     setLoading(true);
     setError("");
 
-    // Validate audio file
     if (!audioFile) {
       setError("Please select an audio file");
       setLoading(false);
       return;
     }
 
-    // Create FormData
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("audio", audioFile);
-    if (imageFile) {
-      data.append("image", imageFile);
-    }
+    if (imageFile) data.append("image", imageFile);
 
     try {
-      const response = await api.post("/music/upload", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      await api.post("/music/upload", data, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Upload success:", response.data);
       navigate("/home");
     } catch (error) {
       setError(error.response?.data?.message || "Upload failed");
-      console.error("Upload error:", error);
     } finally {
       setLoading(false);
     }
@@ -76,91 +67,133 @@ export default function Upload() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
-      <div className="pt-20 px-6 max-w-2xl mx-auto pb-24">
-        <h1 className="text-3xl font-bold text-white mb-6">📤 Upload Track</h1>
+      <div className="pt-24 px-6 max-w-2xl mx-auto pb-32">
+        <h1 className="text-3xl font-bold text-white mb-8">Upload Track</h1>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
           <div>
-            <label className="text-gray-300 block mb-2">Track Title *</label>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Track Title
+            </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-white/5 text-white placeholder:text-white/30 px-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition"
               required
             />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="text-gray-300 block mb-2">Description</label>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Description
+            </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows="3"
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500 resize-none"
+              className="w-full bg-white/5 text-white placeholder:text-white/30 px-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition resize-none"
             />
           </div>
 
-          {/* Audio File */}
+          {/* Audio Upload */}
           <div>
-            <label className="text-gray-300 block mb-2">Audio File *</label>
-            <div className="bg-gray-800 rounded-lg p-4">
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={handleAudioChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
-                required
-              />
-              {audioPreview && (
-                <div className="mt-3">
-                  <audio controls className="w-full">
-                    <source src={audioPreview} />
-                  </audio>
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Audio File
+            </label>
+            <div className="bg-white/5 rounded-xl p-6 border-2 border-dashed border-white/10 hover:border-red-500/30 transition">
+              {!audioPreview ? (
+                <label className="flex flex-col items-center justify-center cursor-pointer">
+                  <Music className="w-12 h-12 text-white/20 mb-3" />
+                  <span className="text-white/40 text-sm">
+                    Click to upload audio
+                  </span>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Music className="w-6 h-6 text-red-500" />
+                    <span className="text-white text-sm">
+                      {audioFile?.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAudioFile(null);
+                      setAudioPreview(null);
+                    }}
+                    className="text-white/30 hover:text-red-500 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Image File */}
+          {/* Image Upload */}
           <div>
-            <label className="text-gray-300 block mb-2">Cover Image (Optional)</label>
-            <div className="bg-gray-800 rounded-lg p-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
-              />
-              {imagePreview && (
-                <div className="mt-3">
+            <label className="text-white/60 text-sm font-medium block mb-2">
+              Cover Image
+            </label>
+            <div className="bg-white/5 rounded-xl p-6 border-2 border-dashed border-white/10 hover:border-red-500/30 transition">
+              {!imagePreview ? (
+                <label className="flex flex-col items-center justify-center cursor-pointer">
+                  <Image className="w-12 h-12 text-white/20 mb-3" />
+                  <span className="text-white/40 text-sm">
+                    Click to upload image
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center gap-4">
                   <img
                     src={imagePreview}
-                    alt="Cover preview"
-                    className="w-32 h-32 object-cover rounded-lg"
+                    alt="Cover"
+                    className="w-20 h-20 object-cover rounded-xl"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="text-white/30 hover:text-red-500 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? "Uploading..." : "Upload Track 🚀"}
+            <UploadIcon className="w-5 h-5" />
+            {loading ? "Uploading..." : "Upload Track"}
           </button>
         </form>
       </div>

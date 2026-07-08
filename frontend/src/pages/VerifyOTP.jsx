@@ -61,14 +61,14 @@ export default function VerifyOTP() {
             placeholder="Enter OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-6 text-center text-2xl tracking-widest outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-6 text-center text-2xl tracking-widest outline-none focus:ring-2 focus:ring-red-500"
             maxLength="6"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Verify Email"}
           </button>
@@ -78,7 +78,7 @@ export default function VerifyOTP() {
           Didn't receive code?{" "}
           <button
             onClick={handleResend}
-            className="text-green-500 hover:underline"
+            className="text-red-500 hover:underline"
           >
             Resend OTP
           </button>

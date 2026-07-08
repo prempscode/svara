@@ -71,7 +71,7 @@ export default function UserProfile() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl text-white bg-gradient-to-br from-green-600 to-blue-600">
+              <div className="w-full h-full flex items-center justify-center text-4xl text-white bg-gradient-to-br from-red-600 to-blue-600">
                 {user.username?.[0]?.toUpperCase()}
               </div>
             )}
@@ -96,7 +96,7 @@ export default function UserProfile() {
                   />
                   <button
                     onClick={() => handleLike(track._id)}
-                    className="absolute bottom-2 right-2 bg-green-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transition"
+                    className="absolute bottom-2 right-2 bg-red-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transition"
                   >
                     ❤️
                   </button>

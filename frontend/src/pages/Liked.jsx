@@ -69,12 +69,12 @@ export default function Liked() {
                 <div className="flex-1">
                   <h3 className="text-white font-semibold">{track.title}</h3>
                   <Link to={`/user/${track.artist?._id}`}>
-                    <p className="text-gray-400 text-sm hover:text-green-500">{track.artist?.username}</p>
+                    <p className="text-gray-400 text-sm hover:text-red-500">{track.artist?.username}</p>
                   </Link>
                 </div>
                 <button
                   onClick={() => handleUnlike(track._id)}
-                  className="text-green-500 hover:text-green-400 text-2xl"
+                  className="text-red-500 hover:text-red-400 text-2xl"
                 >
                   ❤️
                 </button>
