@@ -1,0 +1,57 @@
+.cover {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+
+  border-radius: 22px;
+
+  margin-bottom: 24px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  color: var(--text-secondary);
+
+  font-size: 15px;
+}
+
+.audio {
+  width: 100%;
+  margin-top: 32px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  margin-top: 32px;
+}
+
+.link {
+  display: inline-block;
+
+  margin-top: 24px;
+
+  color: var(--accent);
+
+  font-weight: 600;
+}
+
+.link:hover {
+  color: #3395ff;
+}

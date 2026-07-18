@@ -1,113 +1,140 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import api from "../api/axios";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
-export default function UserProfile() {
-  const { userId } = useParams();
-  const [user, setUser] = useState(null);
+import PageLayout from "../components/PageLayout/PageLayout";
+import MusicCard from "../components/MusicCard/MusicCard";
+
+import { getUserProfile } from "../services/profileService";
+import { getUserTracks, getUserAlbums } from "../services/musicService";
+
+import styles from "./UserProfile.module.css";
+
+function UserProfile() {
+  const { id } = useParams();
+
+  const [profile, setProfile] = useState(null);
   const [tracks, setTracks] = useState([]);
+  const [albums, setAlbums] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = async () => {
-    try {
-      const userResponse = await api.get(`/auth/profile/${userId}`);
-      setUser(userResponse.data.user);
-
-      const tracksResponse = await api.get(`/music/user/${userId}`);
-      setTracks(tracksResponse.data.musics);
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchUserProfile();
-      setLoading(false);
-    };
-    loadData();
-  }, [userId]);
+    async function fetchData() {
+      try {
+        const [profileData, trackData, albumData] = await Promise.all([
+          getUserProfile(id),
+          getUserTracks(id),
+          getUserAlbums(id),
+        ]);
 
-  const handleLike = async (trackId) => {
-    try {
-      await api.post(`/music/${trackId}/like`);
-      fetchUserProfile(); // Refresh to update likes
-    } catch (error) {
-      console.error("Error liking track:", error);
+        setProfile(profileData.user);
+        setTracks(trackData.musics);
+        setAlbums(albumData.albums);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+
+    fetchData();
+  }, [id]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
+      <PageLayout title="Profile">
+        <h2>Loading...</h2>
+      </PageLayout>
     );
   }
 
-  if (!user) {
+  if (!profile) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">User not found</div>
-      </div>
+      <PageLayout title="Profile">
+        <h2>User not found.</h2>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <div className="pt-20 px-6 max-w-4xl mx-auto pb-24">
-        {/* User Header */}
-        <div className="flex items-center gap-6 mb-8">
-          <div className="w-32 h-32 rounded-full bg-gray-700 overflow-hidden">
-            {user.profileImage ? (
-              <img
-                src={user.profileImage}
-                alt={user.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl text-white bg-gradient-to-br from-red-600 to-blue-600">
-                {user.username?.[0]?.toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-white">{user.username}</h1>
-            <p className="text-gray-400">📀 {tracks.length} tracks</p>
-          </div>
+    <PageLayout title={profile.username}>
+      <div className={styles.header}>
+        <img
+          src={profile.profileImage || "https://placehold.co/200x200?text=User"}
+          alt={profile.username}
+          className={styles.avatar}
+          loading="lazy"
+        />
+
+        <h2>{profile.username}</h2>
+      </div>
+
+      <div className={styles.stats}>
+        <div className={styles.stat}>
+          <h3>{tracks.length}</h3>
+          <p>Songs</p>
         </div>
 
-        {/* User's Tracks */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-4">🎵 All Tracks</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {tracks.map((track) => (
-              <div key={track._id} className="bg-gray-900 p-3 rounded-lg group">
-                <div className="relative">
-                  <img
-                    src={track.image || "https://picsum.photos/200"}
-                    alt={track.title}
-                    className="w-full aspect-square object-cover rounded-lg mb-2"
-                  />
-                  <button
-                    onClick={() => handleLike(track._id)}
-                    className="absolute bottom-2 right-2 bg-red-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transition"
-                  >
-                    ❤️
-                  </button>
-                </div>
-                <h4 className="text-white font-semibold truncate">{track.title}</h4>
-                <p className="text-gray-400 text-sm">❤️ {track.likes?.length || 0}</p>
-              </div>
-            ))}
-          </div>
+        <div className={styles.stat}>
+          <h3>{albums.length}</h3>
+          <p>Albums</p>
         </div>
       </div>
-    </div>
+
+      <div className={styles.section}>
+        <h2>Uploaded Songs</h2>
+
+        {tracks.length === 0 ? (
+          <p className={styles.empty}>No songs uploaded yet.</p>
+        ) : (
+          <div className={styles.grid}>
+            {tracks.map((music) => (
+              <MusicCard
+                key={music._id}
+                music={music}
+                showLike={false}
+                showLikeCount={false}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.section}>
+        <h2>Albums</h2>
+
+        {albums.length === 0 ? (
+          <p className={styles.empty}>No albums created yet.</p>
+        ) : (
+          <div className={styles.albumGrid}>
+            {albums.map((album) => (
+              <Link
+                key={album._id}
+                to={`/albums/${album._id}`}
+                className={styles.albumCard}
+              >
+                {album.image ? (
+                  <img
+                    src={album.image}
+                    alt={album.title}
+                    className={styles.albumImage}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className={styles.placeholder}>🎵</div>
+                )}
+
+                <div className={styles.albumContent}>
+                  <h3>{album.title}</h3>
+                  <p>{album.artist.username}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </PageLayout>
   );
 }
+
+export default UserProfile;

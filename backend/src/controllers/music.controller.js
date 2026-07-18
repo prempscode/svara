@@ -152,31 +152,59 @@ async function getAllMusics(req, res) {
 async function createAlbum(req, res) {
   try {
     const { title, description, musics } = req.body;
-    console.log("📀 Creating album with:", { title, description, musics });
+
+    console.log(" Creating album with:", {
+      title,
+      description,
+      musics,
+    });
 
     // Validate required fields
     if (!title) {
-      return res.status(400).json({ message: "Album title is required" });
+      return res.status(400).json({
+        message: "Album title is required",
+      });
     }
 
-    // Parse musics if it's a string (sent as JSON string from FormData)
+    // Parse selected music IDs
     let musicIds = [];
+
     if (musics) {
       try {
         musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
       } catch (e) {
-        console.error("❌ Error parsing musics:", e);
-        return res.status(400).json({ message: "Invalid tracks format" });
+        console.error(" Error parsing musics:", e);
+        return res.status(400).json({
+          message: "Invalid tracks format",
+        });
       }
     }
 
-    // Handle album cover image (optional)
+    // Ensure every selected song belongs to the logged-in user
+    if (musicIds.length > 0) {
+      const ownedTracks = await musicModel.find({
+        _id: { $in: musicIds },
+        artist: req.user.id,
+      });
+
+      if (ownedTracks.length !== musicIds.length) {
+        return res.status(403).json({
+          message: "You can only add your own songs to an album.",
+        });
+      }
+    }
+
+    // Upload album cover (optional)
     const imageFile = req.files?.image?.[0];
+
     let imageResult = null;
+
     if (imageFile) {
-      console.log("🖼️ Uploading album cover...");
+      console.log("🖼 Uploading album cover...");
+
       imageResult = await uploadFile(imageFile);
-      console.log("✅ Album cover uploaded:", imageResult.fileId);
+
+      console.log(" Album cover uploaded:", imageResult.fileId);
     }
 
     // Create album
@@ -184,20 +212,21 @@ async function createAlbum(req, res) {
       title,
       description: description || "",
       artist: req.user.id,
-      musics: musicIds || [],
+      musics: musicIds,
       image: imageResult?.url,
       imageFileId: imageResult?.fileId,
     });
 
-    console.log("✅ Album created:", album._id);
+    console.log(" Album created:", album._id);
 
     res.status(201).json({
       message: "Album created successfully",
-      album: album,
+      album,
     });
   } catch (e) {
-    console.error("❌ Error in createAlbum:", e.message);
-    console.error("❌ Full error:", e);
+    console.error(" Error in createAlbum:", e.message);
+    console.error(" Full error:", e);
+
     res.status(500).json({
       message: "Error occurred in music.controller",
       error: e.message,
@@ -334,6 +363,28 @@ async function getUserTracks(req, res) {
   }
 }
 
+async function getUserAlbums(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const albums = await albumModel
+      .find({ artist: userId })
+      .select("title image artist")
+      .populate("artist", "username")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "User albums fetched successfully",
+      albums,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "Error occurred in music.controller",
+      error: e.message,
+    });
+  }
+}
+
 async function toggleLike(req, res) {
   try {
     const { id } = req.params;
@@ -359,7 +410,7 @@ async function toggleLike(req, res) {
     music.likesCount = music.likes.length;
     await music.save();
 
-    // ✅ Return consistent response
+    //  Return consistent response
     res.status(200).json({
       message: isLiked ? "Track unliked" : "Track liked",
       likes: music.likes.length,
@@ -414,41 +465,77 @@ async function updateAlbum(req, res) {
     const { id } = req.params;
     const { title, description, musics } = req.body;
 
-    console.log("📀 Updating album:", id);
-    console.log("📋 Data:", { title, description, musics });
+    console.log("Updating album:", id);
+    console.log("Data:", {
+      title,
+      description,
+      musics,
+    });
 
     // Find album
     const album = await albumModel.findById(id);
+
     if (!album) {
-      return res.status(404).json({ message: "Album not found" });
+      return res.status(404).json({
+        message: "Album not found",
+      });
     }
 
-    // Check ownership
+    // Ownership check
     if (album.artist.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You can't edit this album" });
+      return res.status(403).json({
+        message: "You can't edit this album",
+      });
     }
 
-    // Parse musics if it's a string
+    // Parse selected music IDs
     let musicIds = [];
+
     if (musics) {
       try {
         musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
       } catch (e) {
-        console.error("❌ Error parsing musics:", e);
-        return res.status(400).json({ message: "Invalid tracks format" });
+        console.error(" Error parsing musics:", e);
+
+        return res.status(400).json({
+          message: "Invalid tracks format",
+        });
       }
     }
 
-    // Update fields
-    if (title) album.title = title;
-    if (description) album.description = description;
-    if (musicIds.length > 0) album.musics = musicIds;
+    // Ensure every selected song belongs to the logged-in user
+    if (musicIds.length > 0) {
+      const ownedTracks = await musicModel.find({
+        _id: { $in: musicIds },
+        artist: req.user.id,
+      });
 
-    // Handle album cover update
+      if (ownedTracks.length !== musicIds.length) {
+        return res.status(403).json({
+          message: "You can only add your own songs to an album.",
+        });
+      }
+    }
+
+    // Update album fields
+    if (title) {
+      album.title = title;
+    }
+
+    if (description) {
+      album.description = description;
+    }
+
+    if (musicIds.length > 0) {
+      album.musics = musicIds;
+    }
+
+    // Update album cover
     const imageFile = req.files?.image?.[0];
+
     if (imageFile) {
-      console.log("🖼️ Updating album cover...");
-      // Delete old image
+      console.log(" Updating album cover...");
+
       if (album.imageFileId) {
         try {
           await deleteFile(album.imageFileId);
@@ -456,24 +543,27 @@ async function updateAlbum(req, res) {
           console.error("Error deleting old image:", error.message);
         }
       }
-      // Upload new image
+
       const imageResult = await uploadFile(imageFile);
+
       album.image = imageResult.url;
       album.imageFileId = imageResult.fileId;
-      console.log("✅ Album cover updated:", imageResult.fileId);
+
+      console.log(" Album cover updated:", imageResult.fileId);
     }
 
     await album.save();
 
-    console.log("✅ Album updated:", album._id);
+    console.log(" Album updated:", album._id);
 
     res.status(200).json({
       message: "Album updated successfully",
-      album: album,
+      album,
     });
   } catch (e) {
-    console.error("❌ Error in updateAlbum:", e.message);
-    console.error("❌ Full error:", e);
+    console.error(" Error in updateAlbum:", e.message);
+    console.error(" Full error:", e);
+
     res.status(500).json({
       message: "Error occurred in music.controller",
       error: e.message,
@@ -551,6 +641,7 @@ module.exports = {
   getAllAlbums,
   getAlbumById,
   getUserTracks,
+  getUserAlbums,
   toggleLike,
   getLikedFeed,
   updateAlbum,

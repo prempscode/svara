@@ -1,0 +1,121 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 140px;
+
+  padding: 16px;
+
+  resize: vertical;
+
+  border: 1px solid transparent;
+  border-radius: 14px;
+
+  background: var(--surface);
+
+  color: var(--text);
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: var(--transition);
+}
+
+.textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.textarea:focus {
+  border-color: var(--accent);
+}
+
+.fileInput {
+  width: 100%;
+
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  background: var(--surface);
+
+  color: var(--text-secondary);
+
+  border: 1px solid transparent;
+
+  transition: var(--transition);
+}
+
+.fileInput:focus {
+  border-color: var(--accent);
+}
+
+.songTitle {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.songList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-top: 8px;
+}
+
+.songItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 16px;
+
+  background: var(--surface);
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  transition: var(--transition);
+}
+
+.songItem:hover {
+  background: var(--surface-hover);
+}
+
+.songItem input {
+  width: 18px;
+  height: 18px;
+
+  accent-color: var(--accent);
+
+  cursor: pointer;
+}
+
+.songItem span {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}

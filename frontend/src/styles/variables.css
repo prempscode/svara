@@ -1,0 +1,33 @@
+:root {
+  /* Colors */
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-hover: #2c2c2e;
+
+  --border: rgba(255, 255, 255, 0.12);
+
+  --text: #ffffff;
+  --text-secondary: rgba(235, 235, 245, 0.6);
+  --text-tertiary: rgba(235, 235, 245, 0.3);
+
+  --accent: #0a84ff;
+  --success: #30d158;
+  --warning: #ff9f0a;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Layout */
+  --container: 1200px;
+
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Animation */
+  --transition: 180ms ease;
+}

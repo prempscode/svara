@@ -1,0 +1,124 @@
+.cover {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 18px;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.section h2 {
+  margin-bottom: 1rem;
+}
+
+.trackList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trackCard {
+  display: block;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.trackCard:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.trackCard h3 {
+  margin: 0 0 0.4rem;
+}
+
+.trackCard p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.empty {
+  color: var(--text-secondary);
+}
+
+.trackList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trackCard {
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--surface-color);
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.trackCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.trackLink {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.trackImage {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.trackPlaceholder {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  background: var(--background-secondary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.trackInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.trackInfo h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.trackInfo p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}

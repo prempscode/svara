@@ -1,174 +1,133 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import api from "../api/axios";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-export default function AlbumDetail() {
+import { useAuth } from "../context/AuthContext";
+
+import { getAlbumById, deleteAlbum } from "../services/musicService";
+
+import PageLayout from "../components/PageLayout/PageLayout";
+import Button from "../components/Button/Button";
+
+import styles from "./AlbumDetail.module.css";
+
+function AlbumDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const fetchAlbum = async () => {
-    try {
-      const response = await api.get(`/music/albums/${id}`);
-      setAlbum(response.data.album);
-    } catch (error) {
-      console.error("Error fetching album:", error);
-      if (error.response?.status === 404) {
-        navigate("/albums");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchAlbum();
-      setLoading(false);
-    };
-    loadData();
+    async function loadAlbum() {
+      try {
+        const data = await getAlbumById(id);
+        setAlbum(data.album);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAlbum();
   }, [id]);
 
-  const handleDeleteAlbum = async () => {
-    try {
-      await api.delete(`/music/albums/${id}`);
-      navigate("/albums");
-    } catch (error) {
-      alert(error.response?.data?.message || "Delete failed");
-    }
-  };
+  async function handleDelete() {
+    if (!window.confirm("Delete this album?")) return;
 
-  const handleLike = async (trackId) => {
     try {
-      await api.post(`/music/${trackId}/like`);
-      fetchAlbum(); // Refresh to update likes
-    } catch (error) {
-      console.error("Error liking track:", error);
+      setDeleting(true);
+
+      await deleteAlbum(id);
+
+      navigate("/albums");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Unable to delete album");
+    } finally {
+      setDeleting(false);
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
+      <PageLayout title="Album">
+        <p>Loading...</p>
+      </PageLayout>
     );
   }
 
   if (!album) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Album not found</div>
-      </div>
+      <PageLayout title="Album">
+        <p>Album not found.</p>
+      </PageLayout>
     );
   }
 
+  const isOwner = album.artist._id === user._id;
+
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <div className="pt-20 px-6 max-w-4xl mx-auto pb-24">
-        {/* Album Header */}
-        <div className="flex items-center gap-6 mb-8">
-          <img
-            src={album.image || "https://picsum.photos/300"}
-            alt={album.title}
-            className="w-48 h-48 object-cover rounded-lg shadow-2xl"
-          />
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-white">{album.title}</h1>
-            <p className="text-gray-400 text-lg">
-              by {album.artist?.username}
-            </p>
-            <p className="text-gray-500 mt-2">{album.description}</p>
-            <p className="text-gray-500 text-sm mt-2">
-              {album.musics?.length || 0} tracks
-            </p>
-            <div className="flex gap-3 mt-4">
-              <Link
-                to={`/edit-album/${album._id}`}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition"
-              >
-                Edit Album
-              </Link>
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition"
-              >
-                Delete Album
-              </button>
-            </div>
-          </div>
-        </div>
+    <PageLayout
+      title={album.title}
+      subtitle={album.description || "Album details"}
+    >
+      {album.image && (
+        <img
+          src={album.image}
+          alt={album.title}
+          className={styles.cover}
+          loading="lazy"
+        />
+      )}
 
-        {/* Tracks List */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-4">Tracks</h2>
-          {album.musics?.length === 0 ? (
-            <p className="text-gray-400">No tracks in this album yet</p>
-          ) : (
-            <div className="space-y-3">
-              {album.musics.map((track, index) => (
-                <div
-                  key={track._id}
-                  className="bg-gray-900 hover:bg-gray-800 p-4 rounded-lg flex items-center gap-4"
-                >
-                  <span className="text-gray-500 w-8">{index + 1}</span>
-                  <img
-                    src={track.image || "https://picsum.photos/50"}
-                    alt={track.title}
-                    className="w-12 h-12 rounded object-cover"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold">{track.title}</h3>
-                    <p className="text-gray-400 text-sm">
-                      {track.artist?.username}
-                    </p>
+      <section className={styles.section}>
+        <h2>Tracks</h2>
+
+        {album.musics.length === 0 ? (
+          <p className={styles.empty}>No songs in this album.</p>
+        ) : (
+          <div className={styles.trackList}>
+            {album.musics.map((music) => (
+              <div key={music._id} className={styles.trackCard}>
+                <Link to={`/music/${music._id}`} className={styles.trackLink}>
+                  {music.image ? (
+                    <img
+                      src={music.image}
+                      alt={music.title}
+                      className={styles.trackImage}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className={styles.trackPlaceholder}>🎵</div>
+                  )}
+
+                  <div className={styles.trackInfo}>
+                    <h3>{music.title}</h3>
+                    <p>{music.artist.username}</p>
                   </div>
-                  <button
-                    onClick={() => handleLike(track._id)}
-                    className="text-2xl hover:scale-110 transition"
-                  >
-                    {track.likes?.includes(album.artist?._id) ? "❤️" : "🤍"}
-                  </button>
-                  <p className="text-gray-500 text-sm">
-                    ❤️ {track.likes?.length || 0}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-gray-900 p-6 rounded-xl max-w-md w-full">
-              <h3 className="text-xl font-bold text-white mb-4">Delete Album?</h3>
-              <p className="text-gray-400 mb-6">
-                Are you sure you want to delete "{album.title}"? This action cannot be undone.
-              </p>
-              <div className="flex gap-4">
-                <button
-                  onClick={handleDeleteAlbum}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition"
-                >
-                  Cancel
-                </button>
+                </Link>
               </div>
-            </div>
+            ))}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+
+      {isOwner && (
+        <div className={styles.actions}>
+          <Button onClick={() => navigate(`/albums/${id}/edit`)}>
+            Edit Album
+          </Button>
+
+          <Button variant="secondary" onClick={handleDelete} loading={deleting}>
+            Delete Album
+          </Button>
+        </div>
+      )}
+    </PageLayout>
   );
 }
+
+export default AlbumDetail;

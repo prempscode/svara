@@ -107,4 +107,10 @@ router.delete(
   musicController.deleteAlbum,
 );
 
+router.get(
+  "/albums/user/:userId",
+  authMiddleware.authGlobal,
+  musicController.getUserAlbums,
+);
+
 module.exports = router;

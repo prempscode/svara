@@ -1,91 +1,117 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
 
-export default function VerifyOTP() {
+import { useAuth } from "../context/AuthContext";
+import { resendOTP, verifyOTP } from "../services/authService";
+
+import PageLayout from "../components/PageLayout/PageLayout";
+import Input from "../components/Input/Input";
+import Button from "../components/Button/Button";
+
+import styles from "./Auth.module.css";
+
+const VerifyOTP = () => {
   const navigate = useNavigate();
+
+  const { refreshProfile } = useAuth();
+
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const userId = localStorage.getItem("tempUserId");
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const [isResending, setIsResending] = useState(false);
+
+  const pendingVerification = useMemo(() => {
+    const data = localStorage.getItem("pendingVerification");
+    return data ? JSON.parse(data) : null;
+  }, []);
+
+  const userId = pendingVerification?.userId;
+  const email = pendingVerification?.email;
+
+  function maskEmail(email) {
+    if (!email) return "";
+
+    const [username, domain] = email.split("@");
+
+    const visible = username.slice(0, 3);
+
+    return `${visible}****@${domain}`;
+  }
+
+  async function handleVerifyOTP(e) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const response = await api.post("/auth/verify-otp", { userId, otp });
-
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.removeItem("tempUserId");
-      navigate("/home");
-    } catch (err) {
-      setError(err.response?.data?.message || "Invalid OTP");
-    } finally {
-      setLoading(false);
+    if (!otp.trim()) {
+      alert("OTP is required");
+      return;
     }
-  };
 
-  const handleResend = async () => {
+    setIsVerifying(true);
+
     try {
-      await api.post("/auth/resend-otp", {
-        email: localStorage.getItem("tempEmail"),
-      });
-      alert("New OTP sent to your email!");
+      await verifyOTP(userId, otp);
+
+      localStorage.removeItem("pendingVerification");
+
+      await refreshProfile();
+
+      navigate("/");
     } catch (error) {
-      console.log(error.message);
-      alert("Failed to resend OTP");
+      alert(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsVerifying(false);
     }
-  };
+  }
+
+  async function handleResendOTP() {
+    setIsResending(true);
+
+    try {
+      await resendOTP(email);
+
+      alert("OTP sent successfully");
+    } catch (error) {
+      alert(error.response?.data?.message || "Unable to resend OTP");
+    } finally {
+      setIsResending(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-gray-900 p-8 rounded-2xl w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white">📧 Verify Email</h1>
-          <p className="text-gray-400 mt-2">
-            Enter the 6-digit code sent to your email
-          </p>
-        </div>
+    <PageLayout
+      title="Verify Email"
+      subtitle="Enter the verification code sent to your email."
+    >
+      <div className={styles.wrapper}>
+        <form className={styles.form} onSubmit={handleVerifyOTP}>
+          <p className={styles.info}>{maskEmail(email)}</p>
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <input
+          <Input
+            label="OTP"
             type="text"
-            placeholder="Enter OTP"
+            placeholder="Enter 6-digit OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-6 text-center text-2xl tracking-widest outline-none focus:ring-2 focus:ring-red-500"
-            maxLength="6"
-            required
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify Email"}
-          </button>
-        </form>
 
-        <p className="text-gray-400 text-center mt-4">
-          Didn't receive code?{" "}
-          <button
-            onClick={handleResend}
-            className="text-red-500 hover:underline"
+          <Button type="submit" loading={isVerifying} fullWidth>
+            Verify OTP
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            loading={isResending}
+            onClick={handleResendOTP}
+            fullWidth
           >
             Resend OTP
-          </button>
-        </p>
+          </Button>
+        </form>
       </div>
-    </div>
+    </PageLayout>
   );
-}
+};
+
+export default VerifyOTP;

@@ -1,111 +1,118 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
 
-export default function Register() {
+import { registerUser } from "../services/authService";
+
+import PageLayout from "../components/PageLayout/PageLayout";
+import Input from "../components/Input/Input";
+import Button from "../components/Button/Button";
+
+import styles from "./Auth.module.css";
+
+const Register = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    role: "user",
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
+  function handleChange(e) {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+
+    if (!formData.username.trim()) {
+      alert("Username is required");
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      alert("Email is required");
+      return;
+    }
+
+    if (!formData.password.trim()) {
+      alert("Password is required");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      const response = await api.post("/auth/register", formData);
-      // Save userId for OTP verification
-      localStorage.setItem("tempUserId", response.data.userId);
+      const response = await registerUser(formData);
+
+      localStorage.setItem(
+        "pendingVerification",
+        JSON.stringify({
+          userId: response.data.userId,
+          email: formData.email,
+        }),
+      );
+
       navigate("/verify-otp");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-gray-900 p-8 rounded-2xl w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white">🎵 Svara</h1>
-          <p className="text-gray-400 mt-2">Create your account</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <input
+    <PageLayout
+      title="Create Account"
+      subtitle="Join and start sharing your music."
+    >
+      <div className={styles.wrapper}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            label="Username"
             type="text"
             name="username"
-            placeholder="Username"
+            placeholder="Choose a username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
-            required
           />
-          <input
+
+          <Input
+            label="Email"
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="name@example.com"
             value={formData.email}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
-            required
           />
-          <input
+
+          <Input
+            label="Password"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Create a password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-red-500"
-            required
           />
 
-          <div className="mb-4">
-            <label className="text-gray-400 block mb-2">I want to:</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
-            >
-              <option value="user">Listen to music 🎧</option>
-              <option value="artist">Upload my music 🎵</option>
-            </select>
-          </div>
+          <Button type="submit" loading={isSubmitting} fullWidth>
+            Create Account
+          </Button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? "Creating Account..." : "Create Account"}
-          </button>
+          <p className={styles.footer}>
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
         </form>
-
-        <p className="text-gray-400 text-center mt-4">
-          Already have an account?{" "}
-          <Link to="/" className="text-red-500 hover:underline">
-            Sign In
-          </Link>
-        </p>
       </div>
-    </div>
+    </PageLayout>
   );
-}
+};
+
+export default Register;

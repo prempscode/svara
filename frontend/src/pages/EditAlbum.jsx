@@ -1,239 +1,166 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function EditAlbum() {
+import {
+  getAlbumById,
+  getAllMusic,
+  updateAlbum,
+} from "../services/musicService";
+
+import PageLayout from "../components/PageLayout/PageLayout";
+import Input from "../components/Input/Input";
+import Button from "../components/Button/Button";
+
+import styles from "./CreateAlbum.module.css";
+
+function EditAlbum() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
+
+  const [musics, setMusics] = useState([]);
+  const [selectedMusics, setSelectedMusics] = useState([]);
+
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [userTracks, setUserTracks] = useState([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-  });
-  const [selectedTracks, setSelectedTracks] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [currentImage, setCurrentImage] = useState(null);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    const fetchAlbum = async () => {
+    async function loadData() {
       try {
-        const response = await api.get(`/music/albums/${id}`);
-        const album = response.data.album;
-        setFormData({
-          title: album.title,
-          description: album.description || "",
-        });
-        setSelectedTracks(album.musics.map((track) => track._id));
-        setCurrentImage(album.image);
-      } catch (error) {
-        console.error("Error fetching album:", error);
-        setError("Album not found");
-        navigate("/albums");
+        const [albumData, musicData] = await Promise.all([
+          getAlbumById(id),
+          getAllMusic(),
+        ]);
+
+        const album = albumData.album;
+
+        setTitle(album.title);
+        setDescription(album.description || "");
+        setSelectedMusics(album.musics.map((music) => music._id));
+
+        setMusics(musicData.musics);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-
-    const fetchTracks = async () => {
-      try {
-        const response = await api.get("/music/user/me");
-        setUserTracks(response.data.musics);
-      } catch (error) {
-        console.error("Error fetching tracks:", error);
-      }
-    };
-
-    fetchAlbum();
-    fetchTracks();
-  }, [id, navigate]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
     }
-  };
 
-  const handleTrackToggle = (trackId) => {
-    setSelectedTracks((prev) =>
-      prev.includes(trackId)
-        ? prev.filter((id) => id !== trackId)
-        : [...prev, trackId]
+    loadData();
+  }, [id]);
+
+  function toggleMusic(id) {
+    setSelectedMusics((prev) =>
+      prev.includes(id)
+        ? prev.filter((musicId) => musicId !== id)
+        : [...prev, id],
     );
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitting(true);
-    setError("");
 
-    const data = new FormData();
-    data.append("title", formData.title);
-    data.append("description", formData.description);
-    data.append("musics", JSON.stringify(selectedTracks));
-    if (imageFile) {
-      data.append("image", imageFile);
+    setUpdating(true);
+
+    const formData = new FormData();
+
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("musics", JSON.stringify(selectedMusics));
+
+    if (image) {
+      formData.append("image", image);
     }
 
     try {
-      await api.patch(`/music/albums/${id}`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      navigate(`/album/${id}`);
-    } catch (error) {
-      setError(error.response?.data?.message || "Update failed");
+      await updateAlbum(id, formData);
+      navigate(`/albums/${id}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Unable to update album");
     } finally {
-      setSubmitting(false);
+      setUpdating(false);
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
+      <PageLayout title="Edit Album">
+        <h2>Loading...</h2>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <div className="pt-20 px-6 max-w-2xl mx-auto pb-24">
-        <h1 className="text-3xl font-bold text-white mb-6">✏️ Edit Album</h1>
+    <PageLayout title="Edit Album" subtitle="Update your album details.">
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <Input
+          label="Album Title"
+          placeholder="Summer Vibes"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
-            {error}
+        <div className={styles.field}>
+          <label className={styles.label}>Description</label>
+
+          <textarea
+            className={styles.textarea}
+            rows={5}
+            placeholder="Write something about this album..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Change Album Cover (Optional)</label>
+
+          <input
+            className={styles.fileInput}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <h3 className={styles.songTitle}>Songs</h3>
+
+          <div className={styles.songList}>
+            {musics.map((music) => (
+              <label key={music._id} className={styles.songItem}>
+                <input
+                  type="checkbox"
+                  checked={selectedMusics.includes(music._id)}
+                  onChange={() => toggleMusic(music._id)}
+                />
+
+                <span>{music.title}</span>
+              </label>
+            ))}
           </div>
-        )}
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="text-gray-300 block mb-2">Album Title *</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
-              required
-            />
-          </div>
+        <div className={styles.actions}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => navigate(`/albums/${id}`)}
+          >
+            Cancel
+          </Button>
 
-          {/* Description */}
-          <div>
-            <label className="text-gray-300 block mb-2">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-red-500 resize-none"
-            />
-          </div>
-
-          {/* Current Image */}
-          {currentImage && !imageFile && (
-            <div>
-              <label className="text-gray-300 block mb-2">Current Cover</label>
-              <img
-                src={currentImage}
-                alt="Current cover"
-                className="w-32 h-32 object-cover rounded-lg"
-              />
-            </div>
-          )}
-
-          {/* New Image */}
-          <div>
-            <label className="text-gray-300 block mb-2">New Cover (Optional)</label>
-            <div className="bg-gray-800 rounded-lg p-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
-              />
-              {imagePreview && (
-                <div className="mt-3">
-                  <img
-                    src={imagePreview}
-                    alt="New cover preview"
-                    className="w-32 h-32 object-cover rounded-lg"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Select Tracks */}
-          <div>
-            <label className="text-gray-300 block mb-2">
-              Select Tracks ({selectedTracks.length} selected)
-            </label>
-            <div className="bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto">
-              {userTracks.length === 0 ? (
-                <p className="text-gray-400">You haven't uploaded any tracks yet</p>
-              ) : (
-                userTracks.map((track) => (
-                  <div
-                    key={track._id}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded cursor-pointer"
-                    onClick={() => handleTrackToggle(track._id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTracks.includes(track._id)}
-                      onChange={() => {}}
-                      className="w-5 h-5 accent-red-600"
-                    />
-                    <img
-                      src={track.image || "https://picsum.photos/40"}
-                      alt={track.title}
-                      className="w-10 h-10 rounded object-cover"
-                    />
-                    <div className="flex-1">
-                      <p className="text-white">{track.title}</p>
-                      <p className="text-gray-400 text-sm">❤️ {track.likes?.length || 0}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-            >
-              {submitting ? "Updating..." : "Update Album"}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(`/album/${id}`)}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Button type="submit" loading={updating}>
+            Update Album
+          </Button>
+        </div>
+      </form>
+    </PageLayout>
   );
 }
+
+export default EditAlbum;

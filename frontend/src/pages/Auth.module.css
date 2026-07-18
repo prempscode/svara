@@ -1,0 +1,38 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.form {
+  width: 100%;
+  max-width: 460px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.info {
+  text-align: center;
+
+  color: var(--text-secondary);
+
+  font-size: 15px;
+
+  margin-top: -8px;
+}
+.footer {
+  text-align: center;
+
+  font-size: 15px;
+
+  color: var(--text-secondary);
+}
+
+.footer a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.footer a:hover {
+  color: #3395ff;
+}

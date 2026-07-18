@@ -1,126 +1,96 @@
-// src/pages/Home.jsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getAllMusic } from "../services/musicService";
 import { Link } from "react-router-dom";
-import { Heart, Play, Music2 } from "lucide-react";
-import api from "../api/axios";
-import Navbar from "../components/Navbar";
-import { useNavigate } from "react-router-dom";
+import { toggleLike } from "../services/musicService";
+import { useAuth } from "../context/AuthContext";
+import MusicCard from "../components/MusicCard/MusicCard";
+import styles from "./Home.module.css";
+import PageLayout from "../components/PageLayout/PageLayout";
 
-export default function Home() {
-  const navigate = useNavigate();
-  const [tracks, setTracks] = useState([]);
+const Home = () => {
+  const [musics, setMusics] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
-  const handleTrackClick = (trackId) => {
-    navigate(`/player/${trackId}`);
-  };
+  const [error, setError] = useState(null);
 
-  const fetchTracks = async () => {
+  const { user } = useAuth();
+
+  async function fetchMusic() {
     try {
-      const response = await api.get("/music");
-      setTracks(response.data.musics);
+      setLoading(true);
+      setError(null);
+
+      const data = await getAllMusic();
+      // console.log(data.musics);
+      setMusics(data.musics);
     } catch (error) {
-      console.error("Error fetching tracks:", error);
+      setError(error.response?.data?.message || "Unable to fetch music.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchTracks();
-      setLoading(false);
-    };
-    loadData();
+    const getMusics = () => fetchMusic();
+    getMusics();
   }, []);
 
-  const handleLike = async (trackId) => {
-    try {
-      await api.post(`/music/${trackId}/like`);
-      await fetchTracks();
-    } catch (error) {
-      console.error("Error liking track:", error);
-    }
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Music2 className="w-8 h-8 text-white/40 animate-pulse" />
-      </div>
-    );
+    return <h2>Loading...</h2>;
+  }
+
+  if (error) {
+    return <h2>{error}</h2>;
+  }
+  async function handleLike(id) {
+    try {
+      const data = await toggleLike(id);
+
+      setMusics((prev) =>
+        prev.map((music) => {
+          if (music._id !== id) {
+            return music;
+          }
+
+          const updatedLikes = data.isLiked
+            ? [...music.likes, user._id]
+            : music.likes.filter((likeId) => likeId?.toString() !== user._id);
+
+          return {
+            ...music,
+            likes: updatedLikes,
+          };
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
+    <PageLayout
+      title="All Music"
+      subtitle="Discover new tracks from the community."
+    >
+      <div className={styles.grid}>
+        {musics.map((music) => {
+          const isLiked = music.likes.some(
+            (likeId) => likeId?.toString() === user._id,
+          );
 
-      <main className="pt-24 px-6 pb-32 max-w-7xl mx-auto">
-        {/* Hero */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Browse
-          </h1>
-          <p className="text-white/40 mt-2">
-            Discover music shared by the community
-          </p>
-        </div>
-
-        {/* Track Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          {tracks.map((track) => (
-            <div
-              key={track._id}
-              onClick={() => handleTrackClick(track._id)}
-              className="group cursor-pointer"
-            >
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-white/5">
-                <img
-                  src={
-                    track.image ||
-                    "https://picsum.photos/seed/" + track._id + "/300/300"
-                  }
-                  alt={track.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                />
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(track._id);
-                    }}
-                    className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shadow-xl hover:scale-110 transition"
-                  >
-                    <Heart className="w-5 h-5 text-white fill-white" />
-                  </button>
-                </div>
-                {/* Play Icon */}
-                <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition">
-                  <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
-                    <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3">
-                <h3 className="text-white font-medium text-sm truncate">
-                  {track.title}
-                </h3>
-                <Link to={`/user/${track.artist?._id}`}>
-                  <p className="text-white/40 text-sm hover:text-white/70 transition truncate">
-                    {track.artist?.username}
-                  </p>
-                </Link>
-                <p className="text-white/30 text-xs mt-1">
-                  ❤️ {track.likes?.length || 0}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+          return (
+            <MusicCard
+              key={music._id}
+              music={music}
+              isLiked={isLiked}
+              onLike={handleLike}
+            />
+          );
+        })}
+      </div>
+    </PageLayout>
   );
-}
+};
+
+export default Home;

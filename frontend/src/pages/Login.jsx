@@ -1,101 +1,95 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, Music2 } from "lucide-react";
-import api from "../api/axios";
+
+import { useAuth } from "../context/AuthContext";
+
+import PageLayout from "../components/PageLayout/PageLayout";
+import Input from "../components/Input/Input";
+import Button from "../components/Button/Button";
+
+import styles from "./Auth.module.css";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const { login } = useAuth();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+
+    if (!formData.email.trim()) {
+      alert("Email is required");
+      return;
+    }
+
+    if (!formData.password.trim()) {
+      alert("Password is required");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      const response = await api.post("/auth/login", formData);
-
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      navigate("/home");
-    } catch (error) {
-      setError(error.response?.data?.message || "Login failed");
+      await login(formData);
+      navigate("/");
+    } catch (e) {
+      console.error(e);
+      alert(e.response?.data?.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <Music2 className="w-16 h-16 text-red-500" />
-          </div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">
-            Svara
-          </h1>
-          <p className="text-white/40 text-sm mt-2">
-            Music sharing, reimagined
+    <PageLayout
+      title="Welcome Back"
+      subtitle="Sign in to continue listening to your music."
+    >
+      <div className={styles.wrapper}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            placeholder="name@example.com"
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          <Button type="submit" loading={isSubmitting} fullWidth>
+            Login
+          </Button>
+
+          <p className={styles.footer}>
+            Don't have an account? <Link to="/register">Register</Link>
           </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-6">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full bg-white/5 text-white placeholder:text-white/30 pl-12 pr-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition"
-              required
-            />
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-            <input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full bg-white/5 text-white placeholder:text-white/30 pl-12 pr-5 py-4 rounded-xl outline-none focus:ring-1 focus:ring-red-500/50 transition"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-xl transition disabled:opacity-50"
-          >
-            {loading ? "Signing In..." : "Sign In"}
-          </button>
         </form>
-
-        <p className="text-white/40 text-center mt-6 text-sm">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-white hover:underline transition"
-          >
-            Sign Up
-          </Link>
-        </p>
       </div>
-    </div>
+    </PageLayout>
   );
 }
