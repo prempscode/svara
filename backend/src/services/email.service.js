@@ -1,10 +1,14 @@
 const nodemailer = require("nodemailer");
 
+// Gmail SMTP — port 587 with STARTTLS, forced to IPv4 because
+// Render's free tier has no IPv6 egress and node resolves smtp.gmail.com
+// to an AAAA record first by default.
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
   requireTLS: true,
+  family: 4,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
@@ -25,7 +29,7 @@ const sendOTPEmail = async (email, otp) => {
     subject: "Svara - Email Verification OTP",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #8a8a8a;">🎵 Svara</h2>
+        <h2 style="color: #8a8a8a;">🎵Svara</h2>
         <h3>Email Verification</h3>
         <p>Your OTP for email verification is:</p>
         <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px;">
