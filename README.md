@@ -1,4 +1,4 @@
-# 🎵 Svara
+# 🎵  Svara — Your Music, Beautifully Organized  
 
 **Svara** is a full-stack music playlist / streaming app. Users can register , upload and browse music tracks, like songs, organize tracks into albums, and manage their profile — all served through a React frontend backed by a Node.js/Express/MongoDB API.
 
