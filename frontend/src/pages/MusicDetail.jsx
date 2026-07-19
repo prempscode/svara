@@ -77,7 +77,7 @@ function MusicDetail() {
 
     try {
       await deleteMusic(id);
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       console.error(err);
     } finally {
@@ -145,7 +145,7 @@ function MusicDetail() {
         <div className={styles.actions}>
           <Button onClick={handleLike}>{isLiked ? "Unlike" : "Like"}</Button>
 
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button variant="secondary" onClick={() => navigate("/home")}>
             Back
           </Button>
 

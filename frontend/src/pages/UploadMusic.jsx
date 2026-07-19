@@ -47,7 +47,7 @@ function UploadMusic() {
 
       await uploadMusic(formData);
 
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       setError(err.response?.data?.message || "Upload failed");
     } finally {
