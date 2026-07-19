@@ -42,7 +42,7 @@ backend/
 │   ├── db/
 │   │   └── db.js                # MongoDB connection (Mongoose)
 │   ├── model/
-│   │   ├── user.model.js        # User schema (role, OTP fields, profile image)
+│   │   ├── user.model.js        # User schema (role, profile image)
 │   │   ├── music.model.js       # Music track schema (likes, artist ref)
 │   │   └── album.model.js       # Album schema (linked tracks)
 │   ├── routes/
@@ -69,7 +69,7 @@ All endpoints are prefixed with `/api`. Routes marked **Auth** require a valid `
 
 | Method | Endpoint | Description | Access |
 |---|---|---|---|
-| POST | `/register` | Register a new account (triggers OTP email) | Public |
+| POST | `/register` | Register a new account | Public |
 | POST | `/login` | Login and receive a JWT cookie | Public |
 | POST | `/logout` | Clear the auth cookie | Public |
 | GET | `/profile` | Get the logged-in user's own profile | Auth |
@@ -127,9 +127,6 @@ JWT_SECRET=your_jwt_secret_key
 # ImageKit (audio + image storage)
 IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 
-# Email (for OTP delivery via Nodemailer)
-EMAIL_USER=your_email_address
-EMAIL_PASSWORD=your_email_app_password
 ```
 
 ### 4. Run the server
