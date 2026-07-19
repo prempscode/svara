@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
+
 import Button from "../components/Button/Button";
 
 import styles from "./LandingPage.module.css";
 
 function LandingPage() {
+  const { user, loading } = useAuth();
+
   const features = [
     {
       title: "Upload Your Music",
@@ -31,6 +35,7 @@ function LandingPage() {
       image: "/images/Feature-4-User-Profiles.png",
     },
   ];
+
   return (
     <main className={styles.page}>
       {/* navbar */}
@@ -41,13 +46,21 @@ function LandingPage() {
         </Link>
 
         <div className={styles.navActions}>
-          <Link to="/login">
-            <Button variant="secondary">Login</Button>
-          </Link>
+          {!loading && user ? (
+            <Link to="/home">
+              <Button>Go to Home</Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="secondary">Login</Button>
+              </Link>
 
-          <Link to="/register">
-            <Button>Get Started</Button>
-          </Link>
+              <Link to="/register">
+                <Button>Get Started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -69,13 +82,21 @@ function LandingPage() {
           </p>
 
           <div className={styles.heroButtons}>
-            <Link to="/register">
-              <Button>Get Started</Button>
-            </Link>
+            {!loading && user ? (
+              <Link to="/home">
+                <Button>Go to Home</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/register">
+                  <Button>Get Started</Button>
+                </Link>
 
-            <Link to="/login">
-              <Button variant="secondary">Login</Button>
-            </Link>
+                <Link to="/login">
+                  <Button variant="secondary">Login</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -118,13 +139,21 @@ function LandingPage() {
           </p>
 
           <div className={styles.ctaButtons}>
-            <Link to="/register">
-              <Button>Get Started</Button>
-            </Link>
+            {!loading && user ? (
+              <Link to="/home">
+                <Button>Go to Home</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/register">
+                  <Button>Get Started</Button>
+                </Link>
 
-            <Link to="/login">
-              <Button variant="secondary">Login</Button>
-            </Link>
+                <Link to="/login">
+                  <Button variant="secondary">Login</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
