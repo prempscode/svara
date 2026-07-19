@@ -44,12 +44,7 @@ function Liked() {
       ) : (
         <div className={styles.grid}>
           {tracks.map((music) => (
-            <MusicCard
-              key={music._id}
-              music={music}
-              showLike={false}
-              showLikeCount={false}
-            />
+            <MusicCard key={music._id} music={music} showLike={false} />
           ))}
         </div>
       )}

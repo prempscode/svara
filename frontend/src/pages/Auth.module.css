@@ -36,3 +36,15 @@
 .footer a:hover {
   color: #3395ff;
 }
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #888);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}

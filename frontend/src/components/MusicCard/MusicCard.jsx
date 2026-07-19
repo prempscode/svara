@@ -38,16 +38,24 @@ function MusicCard({
           {music.artist.username}
         </Link>
 
-        {showLike && (
+        {(showLike || showLikeCount) && (
           <div className={styles.footer}>
-            <button
-              className={styles.likeButton}
-              onClick={() => onLike?.(music._id)}
-            >
-              <FiHeart size={18} fill={isLiked ? "#0A84FF" : "none"} />
-
-              {showLikeCount && music.likes.length}
-            </button>
+            {showLike ? (
+              <button
+                className={styles.likeButton}
+                onClick={() => onLike?.(music._id)}
+              >
+                <FiHeart size={18} fill={isLiked ? "#0A84FF" : "none"} />
+                {showLikeCount && music.likes.length}
+              </button>
+            ) : (
+              showLikeCount && (
+                <span className={styles.likeCount}>
+                  <FiHeart size={18} fill={isLiked ? "#0A84FF" : "none"} />
+                  {music.likes.length}
+                </span>
+              )
+            )}
           </div>
         )}
       </div>

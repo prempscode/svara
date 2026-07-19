@@ -63,6 +63,9 @@ export default function Login() {
       subtitle="Sign in to continue listening to your music."
     >
       <div className={styles.wrapper}>
+        <Link to="/" className={styles.backLink}>
+          ← Back to Home
+        </Link>
         <form className={styles.form} onSubmit={handleSubmit}>
           <Input
             label="Email"

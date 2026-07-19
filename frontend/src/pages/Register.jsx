@@ -64,6 +64,9 @@ const Register = () => {
       subtitle="Join and start sharing your music."
     >
       <div className={styles.wrapper}>
+        <Link to="/" className={styles.backLink}>
+          ← Back to Home
+        </Link>
         <form className={styles.form} onSubmit={handleSubmit}>
           <Input
             label="Username"
