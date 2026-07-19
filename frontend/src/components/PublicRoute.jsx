@@ -1,10 +1,16 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const PublicRoute = ({ children }) => {
-  const { user } = useAuth();
+export default function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
 
-  return user ? <Navigate to="/home" replace /> : children;
-};
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
 
-export default PublicRoute;
+  if (user) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
+}

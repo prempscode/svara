@@ -22,6 +22,7 @@ import EditAlbum from "./pages/EditAlbum";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import UserProfile from "./pages/UserProfile";
+
 import PublicRoute from "./components/PublicRoute";
 
 const ProtectedLayout = ({ children }) => (
@@ -35,14 +36,7 @@ const App = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <LandingPage />
-          </PublicRoute>
-        }
-      />
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/login"
         element={
@@ -60,7 +54,7 @@ const App = () => {
         }
       />
 
-      {/* Protected Routes */}
+      {/* protected routes */}
       <Route
         path="/home"
         element={
