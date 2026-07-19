@@ -169,7 +169,7 @@ function LandingPage() {
 
         <p>Upload. Organize. Discover.</p>
 
-        <span>© 2026 Svara • Built by Prem Sahu</span>
+        <span>© 2026 Svara • Built by Prem Pravash Sahu</span>
       </footer>
     </main>
   );
