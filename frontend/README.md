@@ -1,12 +1,12 @@
 # 🎧 Svara Frontend
 
-The client application for **Svara**, a music playlist / streaming app. Built with **React 19** and **Vite**, it lets users register, verify their account via email OTP, upload and browse music, manage albums, like tracks, and manage their profile.
+The client application for **Svara**, a music playlist / streaming app. Built with **React 19** and **Vite**, it lets users register, upload and browse music, manage albums, like tracks, and manage their profile.
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **Auth Flow** — Register, OTP verification, login, and protected routing via `AuthContext`
+- 🔐 **Auth Flow** — Register , login, and protected routing via `AuthContext`
 - 🏠 **Home Feed** — Browse all uploaded tracks
 - 🎵 **Music Management** — Upload, view, and edit tracks
 - ❤️ **Liked Tracks** — A dedicated feed of tracks you've liked
@@ -47,7 +47,7 @@ frontend/
     ├── context/
     │   └── AuthContext.jsx      # Auth state (current user, login/logout)
     ├── services/
-    │   ├── authService.js       # Register/login/OTP/profile API calls
+    │   ├── authService.js       # Register/login/profile API calls
     │   ├── musicService.js      # Track upload/fetch/like API calls
     │   └── profileService.js    # Profile fetch/update API calls
     ├── components/
@@ -60,7 +60,7 @@ frontend/
     │   └── ProtectedRoute.jsx    # Redirects unauthenticated users to /login
     ├── pages/
     │   ├── LandingPage.jsx       # Public landing page
-    │   ├── Login.jsx / Register.jsx / VerifyOTP.jsx
+    │   ├── Login.jsx / Register.jsx
     │   ├── Home.jsx              # Main authenticated feed
     │   ├── UploadMusic.jsx / EditMusic.jsx / MusicDetail.jsx
     │   ├── Liked.jsx             # Liked tracks feed
@@ -80,7 +80,6 @@ frontend/
 | `/` | Landing page | Public |
 | `/login` | Login | Public |
 | `/register` | Register | Public |
-| `/verify-otp` | OTP verification | Public |
 | `/home` | Main music feed | Protected |
 | `/upload` | Upload a track | Protected |
 | `/music/:id` | Track detail | Protected |
@@ -152,6 +151,4 @@ npm run lint      # Run ESLint
 
 ---
 
-## 📄 License
 
-ISC
