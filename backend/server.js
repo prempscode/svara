@@ -3,11 +3,19 @@ dotenv.config();
 const app = require("./src/app");
 const connectDB = require("./src/db/db");
 
+const port = process.env.PORT || 5000;
 
+const startServer = async () => {
+  try {
+    await connectDB();
 
-const port = 5000;
+    app.listen(port, () => {
+      console.log(`App listening on port ${port}!`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+};
 
-app.listen(port, () => {
-  console.log(`App listening on port ${port}!`);
-  connectDB();
-});
+startServer();

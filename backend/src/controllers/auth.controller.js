@@ -4,6 +4,14 @@ const jwt = require("jsonwebtoken");
 const { uploadFile, deleteFile } = require("../services/storage.service");
 const { generateOTP, sendOTPEmail } = require("../services/email.service");
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
 // registration
 const registerUser = async (req, res) => {
   try {
@@ -37,15 +45,17 @@ const registerUser = async (req, res) => {
 
     await newUser.save();
 
-    // Send OTP email
-    await sendOTPEmail(email, otp);
-
     res.status(201).json({
       message: "User registered! Please verify your email with OTP.",
       userId: newUser._id,
       // Don't send token yet - user needs to verify first
     });
+
+    sendOTPEmail(email, otp).catch((err) => {
+      console.error("Failed to send OTP email to", email, ":", err.message);
+    });
   } catch (error) {
+    console.error("registerUser error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -88,7 +98,7 @@ const verifyOTP = async (req, res) => {
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
     );
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
       message: "Email verified successfully!",
@@ -102,6 +112,7 @@ const verifyOTP = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("verifyOTP error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -128,13 +139,16 @@ const resendOTP = async (req, res) => {
     user.otpExpiry = otpExpiry;
     await user.save();
 
-    // Send new OTP
-    await sendOTPEmail(email, otp);
-
+    // Respond first, send email in background (same reason as register).
     res.status(200).json({
       message: "New OTP sent to your email",
     });
+
+    sendOTPEmail(email, otp).catch((err) => {
+      console.error("Failed to resend OTP email to", email, ":", err.message);
+    });
   } catch (error) {
+    console.error("resendOTP error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -149,7 +163,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Check if email is verified
+    // Check if email is verified
     if (!user.isVerified) {
       return res.status(403).json({
         message: "Please verify your email first. Check your inbox for OTP.",
@@ -166,7 +180,7 @@ const loginUser = async (req, res) => {
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
     );
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
       message: "Login successful",
@@ -180,13 +194,14 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("loginUser error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 // logout
 const logoutUser = async (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", cookieOptions);
   res.status(200).json({
     message: "User logged out successfully",
   });
@@ -336,7 +351,7 @@ const deleteAccount = async (req, res) => {
     await userModel.findByIdAndDelete(userId);
 
     // Clear the cookie
-    res.clearCookie("token");
+    res.clearCookie("token", cookieOptions);
 
     res.status(200).json({
       message: "Account deleted successfully",

@@ -56,7 +56,7 @@ const VerifyOTP = () => {
 
       await refreshProfile();
 
-      navigate("/");
+      navigate("/home", { replace: true });
     } catch (error) {
       alert(error.response?.data?.message || "Something went wrong");
     } finally {

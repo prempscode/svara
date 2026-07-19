@@ -47,7 +47,8 @@ export default function Login() {
 
     try {
       await login(formData);
-      navigate("/");
+
+      navigate("/home", { replace: true });
     } catch (e) {
       console.error(e);
       alert(e.response?.data?.message || "Something went wrong");
