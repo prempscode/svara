@@ -6,7 +6,6 @@ import Navbar from "./components/Navbar/Navbar";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import VerifyOTP from "./pages/VerifyOTP";
 
 import Home from "./pages/Home";
 import UploadMusic from "./pages/UploadMusic";
@@ -35,14 +34,11 @@ const App = () => {
   return (
     <Routes>
       {/* Public Routes */}
-
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
 
       {/* Protected Routes */}
-
       <Route
         path="/home"
         element={
@@ -53,7 +49,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/upload"
         element={
@@ -64,7 +59,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/music/:id"
         element={
@@ -75,7 +69,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/music/:id/edit"
         element={
@@ -86,7 +79,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/liked"
         element={
@@ -97,7 +89,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/albums"
         element={
@@ -108,7 +99,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/albums/:id"
         element={
@@ -119,7 +109,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/albums/:id/edit"
         element={
@@ -130,7 +119,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/create-album"
         element={
@@ -141,7 +129,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/profile"
         element={
@@ -152,7 +139,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/profile/edit"
         element={
@@ -163,7 +149,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/users/:id"
         element={
