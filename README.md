@@ -1,6 +1,6 @@
 # 🎵 Svara
 
-**Svara** is a full-stack music playlist / streaming app. Users can register (with email OTP verification), upload and browse music tracks, like songs, organize tracks into albums, and manage their profile — all served through a React frontend backed by a Node.js/Express/MongoDB API.
+**Svara** is a full-stack music playlist / streaming app. Users can register , upload and browse music tracks, like songs, organize tracks into albums, and manage their profile — all served through a React frontend backed by a Node.js/Express/MongoDB API.
 
 This is a monorepo with two independent apps:
 
@@ -17,7 +17,7 @@ svara/
 
 ## ✨ Features
 
-- 🔐 Registration with email OTP verification, login/logout via JWT (HTTP-only cookies)
+- 🔐 Registration, login/logout via JWT (HTTP-only cookies)
 - 🎧 Upload, browse, edit, and delete music tracks (audio + cover art, stored on ImageKit)
 - ❤️ Like/unlike tracks and view a personal liked-tracks feed
 - 💿 Create, browse, edit, and delete albums with linked tracks
