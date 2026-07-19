@@ -1,21 +1,21 @@
 const nodemailer = require("nodemailer");
 
-// Gmail SMTP — port 587 with STARTTLS, forced to IPv4 because
-// Render's free tier has no IPv6 egress and node resolves smtp.gmail.com
-// to an AAAA record first by default.
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
-  requireTLS: true,
   family: 4,
+  requireTLS: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_KEY,
   },
   tls: {
     rejectUnauthorized: false,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 const generateOTP = () => {
@@ -23,13 +23,14 @@ const generateOTP = () => {
 };
 
 const sendOTPEmail = async (email, otp) => {
+  console.log(`[email] attempting to send OTP to ${email}`);
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"Svara" <${process.env.BREVO_SMTP_USER}>`,
     to: email,
     subject: "Svara - Email Verification OTP",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #8a8a8a;">🎵Svara</h2>
+        <h2 style="color: #8a8a8a;">🎵 Svara</h2>
         <h3>Email Verification</h3>
         <p>Your OTP for email verification is:</p>
         <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px;">
@@ -41,9 +42,16 @@ const sendOTPEmail = async (email, otp) => {
     `,
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log("OTP email sent to", email, "messageId:", info.messageId);
-  return otp;
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(
+      `[email] SUCCESS — sent to ${email}, messageId: ${info.messageId}`,
+    );
+    return otp;
+  } catch (err) {
+    console.error(`[email] FAILED — to ${email}:`, err.message);
+    throw err;
+  }
 };
 
 module.exports = { generateOTP, sendOTPEmail };
