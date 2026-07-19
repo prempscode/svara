@@ -30,7 +30,7 @@ svara/
 | | |
 |---|---|
 | **Frontend** | React 19, Vite, React Router DOM, Axios, CSS Modules |
-| **Backend** | Node.js, Express 5, MongoDB + Mongoose, JWT, Multer, ImageKit, Nodemailer |
+| **Backend** | Node.js, Express 5, MongoDB + Mongoose, JWT, Multer, ImageKit |
 
 ---
 
