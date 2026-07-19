@@ -3,19 +3,20 @@ const generateOTP = () => {
 };
 
 const sendOTPEmail = async (email, otp) => {
-  console.log(`[email] attempting to send OTP to ${email} via Resend`);
+  console.log(`[email] attempting to send OTP to ${email} via Brevo`);
 
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      accept: "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+      "content-type": "application/json",
     },
     body: JSON.stringify({
-      from: "Svara <onboarding@resend.dev>",
-      to: [email],
+      sender: { name: "Svara", email: process.env.BREVO_FROM_EMAIL },
+      to: [{ email: email }],
       subject: "Svara - Email Verification OTP",
-      html: `
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
           <h2 style="color: #8a8a8a;">🎵 Svara</h2>
           <h3>Email Verification</h3>
@@ -32,11 +33,13 @@ const sendOTPEmail = async (email, otp) => {
 
   if (!response.ok) {
     const errBody = await response.text();
-    throw new Error(`Resend API ${response.status}: ${errBody}`);
+    throw new Error(`Brevo API ${response.status}: ${errBody}`);
   }
 
   const data = await response.json();
-  console.log(`[email] SUCCESS — sent to ${email}, id: ${data.id}`);
+  console.log(
+    `[email] SUCCESS — sent to ${email}, messageId: ${data.messageId}`,
+  );
   return otp;
 };
 
