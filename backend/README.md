@@ -1,13 +1,12 @@
 # 🎵 Svara Backend
 
-The REST API powering **Svara**, a music playlist / streaming platform. Built with **Node.js**, **Express 5**, and **MongoDB (Mongoose)**, it handles authentication (with email OTP verification), user profiles, music track uploads, likes, and album management, with all media files stored on **ImageKit**.
+The REST API powering **Svara**, a music playlist / streaming platform. Built with **Node.js**, **Express 5**, and **MongoDB (Mongoose)**, it handles authentication , user profiles, music track uploads, likes, and album management, with all media files stored on **ImageKit**.
 
 ---
 
 ## 🚀 Features
 
 - 🔐 **JWT Authentication** — Tokens issued on login/registration and stored in HTTP-only cookies
-- ✉️ **Email OTP Verification** — New accounts are verified via a one-time code sent by email (Nodemailer), with resend support
 - 👥 **User Roles** — Accounts can be `user` or `artist` (role is stored on the user, available for role-gated routes)
 - 🎧 **Music Upload & Management** — Upload, update, and delete tracks (audio + cover image) via Multer + ImageKit
 - ❤️ **Likes** — Toggle like/unlike on tracks and fetch a personalized "liked" feed
@@ -26,7 +25,6 @@ The REST API powering **Svara**, a music playlist / streaming platform. Built wi
 | Framework | Express.js v5 |
 | Database | MongoDB + Mongoose |
 | Authentication | JSON Web Tokens (JWT), bcrypt / bcryptjs |
-| Email | Nodemailer (OTP delivery) |
 | File Storage | Multer (in-memory) + ImageKit |
 | Image Processing | sharp |
 | Config Management | dotenv |
@@ -51,13 +49,12 @@ backend/
 │   │   ├── auth.routes.js       # /api/auth  — auth + profile routes
 │   │   └── music.routes.js      # /api/music — track + album routes
 │   ├── controllers/
-│   │   ├── auth.controller.js   # Register/login/OTP/profile logic
+│   │   ├── auth.controller.js   # Register/login/profile logic
 │   │   └── music.controller.js  # Track/album CRUD + likes logic
 │   ├── middlewares/
 │   │   └── auth.middleware.js   # authGlobal & authArtist guards
 │   └── services/
 │       ├── storage.service.js   # ImageKit upload/delete logic
-│       └── email.service.js     # Nodemailer OTP email logic
 ├── package.json
 └── .env                         # Not committed — see below
 ```
@@ -73,8 +70,6 @@ All endpoints are prefixed with `/api`. Routes marked **Auth** require a valid `
 | Method | Endpoint | Description | Access |
 |---|---|---|---|
 | POST | `/register` | Register a new account (triggers OTP email) | Public |
-| POST | `/verify-otp` | Verify the OTP sent to email and activate the account | Public |
-| POST | `/resend-otp` | Resend a fresh OTP code | Public |
 | POST | `/login` | Login and receive a JWT cookie | Public |
 | POST | `/logout` | Clear the auth cookie | Public |
 | GET | `/profile` | Get the logged-in user's own profile | Auth |
@@ -154,7 +149,6 @@ The server listens on **http://localhost:5000** (see `server.js`); all routes ar
 ## 🧠 Key Concepts Implemented
 
 - **Password Hashing** — User passwords are hashed with bcrypt before being stored
-- **Email OTP Flow** — Registration is a two-step process: `register` creates an unverified account and emails an OTP, `verify-otp` activates it (with `resend-otp` for expired/lost codes)
 - **JWT in HTTP-only Cookies** — The token is never exposed to client-side JS, reducing XSS risk
 - **Middleware Guards** — `authGlobal` validates the JWT on every protected route; `authArtist` is available for routes that should be artist-only
 - **In-memory Multer + ImageKit** — Uploaded files are buffered in memory and streamed straight to ImageKit (no local disk writes), organized into `svara/audio` and `svara/image` folders
