@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
         // console.error(error);
       }
       setUser(null);
-      localStorage.remoreItem("user");
+      localStorage.removeItem("user");
     } finally {
       setLoading(false);
     }
