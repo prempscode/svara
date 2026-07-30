@@ -19,15 +19,15 @@ The client application for **Svara**, a music playlist / streaming app. Built wi
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Library | React 19 |
-| Build Tool | Vite |
-| Routing | React Router DOM v7 |
-| HTTP Client | Axios |
-| Icons | react-icons |
-| Styling | CSS Modules + global CSS variables |
-| Linting | ESLint (React Hooks + Refresh plugins) |
+| Layer       | Technology                             |
+| ----------- | -------------------------------------- |
+| Library     | React 19                               |
+| Build Tool  | Vite                                   |
+| Routing     | React Router DOM v7                    |
+| HTTP Client | Axios                                  |
+| Icons       | react-icons                            |
+| Styling     | CSS Modules + global CSS variables     |
+| Linting     | ESLint (React Hooks + Refresh plugins) |
 
 ---
 
@@ -75,23 +75,23 @@ frontend/
 
 ## 🗺️ Routes
 
-| Path | Page | Access |
-|---|---|---|
-| `/` | Landing page | Public |
-| `/login` | Login | Public |
-| `/register` | Register | Public |
-| `/home` | Main music feed | Protected |
-| `/upload` | Upload a track | Protected |
-| `/music/:id` | Track detail | Protected |
-| `/music/:id/edit` | Edit a track | Protected |
-| `/liked` | Liked tracks feed | Protected |
-| `/albums` | All albums | Protected |
-| `/albums/:id` | Album detail | Protected |
-| `/albums/:id/edit` | Edit an album | Protected |
-| `/create-album` | Create an album | Protected |
-| `/profile` | Own profile | Protected |
-| `/profile/edit` | Edit own profile | Protected |
-| `/users/:id` | Another user's public profile | Protected |
+| Path               | Page                          | Access    |
+| ------------------ | ----------------------------- | --------- |
+| `/`                | Landing page                  | Public    |
+| `/login`           | Login                         | Public    |
+| `/register`        | Register                      | Public    |
+| `/home`            | Main music feed               | Protected |
+| `/upload`          | Upload a track                | Protected |
+| `/music/:id`       | Track detail                  | Protected |
+| `/music/:id/edit`  | Edit a track                  | Protected |
+| `/liked`           | Liked tracks feed             | Protected |
+| `/albums`          | All albums                    | Protected |
+| `/albums/:id`      | Album detail                  | Protected |
+| `/albums/:id/edit` | Edit an album                 | Protected |
+| `/create-album`    | Create an album               | Protected |
+| `/profile`         | Own profile                   | Protected |
+| `/profile/edit`    | Edit own profile              | Protected |
+| `/users/:id`       | Another user's public profile | Protected |
 
 Protected routes are wrapped in `ProtectedRoute` (redirects to `/login` if not authenticated) and rendered with a shared `Navbar` layout.
 
@@ -117,8 +117,8 @@ npm install
 The Axios instance in `src/api/axios.js` points to the backend:
 
 ```js
-baseURL: "http://localhost:5000/api"
-withCredentials: true
+baseURL: "http://localhost:5000/api";
+withCredentials: true;
 ```
 
 Make sure the [backend](../backend/README.md) is running on `http://localhost:5000` before starting the frontend, since auth relies on an HTTP-only cookie shared via `withCredentials`. Update this URL if your backend runs elsewhere.
@@ -150,5 +150,3 @@ npm run lint      # Run ESLint
 - **CSS Modules** — Each page/component that needs custom styling has a co-located `*.module.css` file to avoid class name collisions, with shared tokens in `styles/variables.css`
 
 ---
-
-
