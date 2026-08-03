@@ -1,13 +1,13 @@
-import styles from "./Button.module.css";
+import styles from './Button.module.css'
 
 const Button = ({
   children,
-  variant = "primary",
+  variant = 'primary',
   fullWidth = false,
   loading = false,
   disabled = false,
-  type = "button",
-  onClick,
+  type = 'button',
+  onClick
 }) => {
   return (
     <button
@@ -17,12 +17,12 @@ const Button = ({
       className={`
         ${styles.button}
         ${styles[variant]}
-        ${fullWidth ? styles.full : ""}
+        ${fullWidth ? styles.full : ''}
       `}
     >
-      {loading ? "Loading..." : children}
+      {loading ? 'Loading...' : children}
     </button>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button
