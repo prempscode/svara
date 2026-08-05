@@ -1,4 +1,4 @@
-import styles from "./PageLayout.module.css";
+import styles from './PageLayout.module.css'
 
 const PageLayout = ({ title, subtitle, children }) => {
   return (
@@ -11,7 +11,7 @@ const PageLayout = ({ title, subtitle, children }) => {
 
       {children}
     </main>
-  );
-};
+  )
+}
 
-export default PageLayout;
+export default PageLayout
