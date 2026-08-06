@@ -1,55 +1,55 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from 'react'
 
-import api from "../api/axios";
+import api from '../api/axios'
 
-const AuthContext = createContext();
+const AuthContext = createContext()
 
-export function AuthProvider({ children }) {
+export function AuthProvider ({ children }) {
   const [user, setUser] = useState(() => {
-    const cached = localStorage.getItem("user");
-    return cached ? JSON.parse(cached) : null;
-  });
-  const [loading, setLoading] = useState(true);
+    const cached = localStorage.getItem('user')
+    return cached ? JSON.parse(cached) : null
+  })
+  const [loading, setLoading] = useState(true)
 
-  async function refreshProfile() {
+  async function refreshProfile () {
     try {
-      const response = await api.get("/auth/profile");
-      setUser(response.data.user);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const response = await api.get('/auth/profile')
+      setUser(response.data.user)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
     } catch (error) {
-      setUser(null);
-      localStorage.removeItem("user");
+      setUser(null)
+      localStorage.removeItem('user')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
-  async function login(formData) {
-    const response = await api.post("/auth/login", formData);
-    setUser(response.data.user);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    return response.data;
+  async function login (formData) {
+    const response = await api.post('/auth/login', formData)
+    setUser(response.data.user)
+    localStorage.setItem('user', JSON.stringify(response.data.user))
+    return response.data
   }
 
-  async function register(formData) {
-    const response = await api.post("/auth/register", formData);
-    setUser(response.data.user);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    return response.data;
+  async function register (formData) {
+    const response = await api.post('/auth/register', formData)
+    setUser(response.data.user)
+    localStorage.setItem('user', JSON.stringify(response.data.user))
+    return response.data
   }
 
-  async function logout() {
-    await api.post("/auth/logout");
-    setUser(null);
-    localStorage.removeItem("user");
+  async function logout () {
+    await api.post('/auth/logout')
+    setUser(null)
+    localStorage.removeItem('user')
   }
 
   useEffect(() => {
-    async function initializeAuth() {
-      await refreshProfile();
+    async function initializeAuth () {
+      await refreshProfile()
     }
-    initializeAuth();
-  }, []);
+    initializeAuth()
+  }, [])
 
   const value = {
     user,
@@ -57,12 +57,12 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-    refreshProfile,
-  };
+    refreshProfile
+  }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
+export function useAuth () {
+  return useContext(AuthContext)
 }
