@@ -1,49 +1,49 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-import { getAllAlbums } from "../services/musicService";
+import { getAllAlbums } from '../services/musicService'
 
-import PageLayout from "../components/PageLayout/PageLayout";
+import PageLayout from '../components/PageLayout/PageLayout'
 
-import styles from "./Albums.module.css";
+import styles from './Albums.module.css'
 
-function Albums() {
-  const [albums, setAlbums] = useState([]);
-  const [loading, setLoading] = useState(true);
+function Albums () {
+  const [albums, setAlbums] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchAlbums() {
+    async function fetchAlbums () {
       try {
-        const data = await getAllAlbums();
-        setAlbums(data.albums);
+        const data = await getAllAlbums()
+        setAlbums(data.albums)
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchAlbums();
-  }, []);
+    fetchAlbums()
+  }, [])
 
   if (loading) {
     return (
-      <PageLayout title="Albums">
+      <PageLayout title='Albums'>
         <p>Loading albums...</p>
       </PageLayout>
-    );
+    )
   }
 
   return (
     <PageLayout
-      title="Albums"
-      subtitle="Discover music collections shared by the community."
+      title='Albums'
+      subtitle='Discover music collections shared by the community.'
     >
       {albums.length === 0 ? (
         <p className={styles.empty}>No albums available.</p>
       ) : (
         <div className={styles.grid}>
-          {albums.map((album) => (
+          {albums.map(album => (
             <Link
               key={album._id}
               to={`/albums/${album._id}`}
@@ -53,7 +53,7 @@ function Albums() {
                 <img
                   src={album.image}
                   alt={album.title}
-                  loading="lazy"
+                  loading='lazy'
                   className={styles.image}
                 />
               ) : (
@@ -69,7 +69,7 @@ function Albums() {
         </div>
       )}
     </PageLayout>
-  );
+  )
 }
 
-export default Albums;
+export default Albums
