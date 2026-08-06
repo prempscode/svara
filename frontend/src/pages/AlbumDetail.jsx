@@ -1,85 +1,85 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../context/AuthContext'
 
-import { getAlbumById, deleteAlbum } from "../services/musicService";
+import { getAlbumById, deleteAlbum } from '../services/musicService'
 
-import PageLayout from "../components/PageLayout/PageLayout";
-import Button from "../components/Button/Button";
+import PageLayout from '../components/PageLayout/PageLayout'
+import Button from '../components/Button/Button'
 
-import styles from "./AlbumDetail.module.css";
+import styles from './AlbumDetail.module.css'
 
-function AlbumDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
+function AlbumDetail () {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const [album, setAlbum] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
+  const [album, setAlbum] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    async function loadAlbum() {
+    async function loadAlbum () {
       try {
-        const data = await getAlbumById(id);
-        setAlbum(data.album);
+        const data = await getAlbumById(id)
+        setAlbum(data.album)
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    loadAlbum();
-  }, [id]);
+    loadAlbum()
+  }, [id])
 
-  async function handleDelete() {
-    if (!window.confirm("Delete this album?")) return;
+  async function handleDelete () {
+    if (!window.confirm('Delete this album?')) return
 
     try {
-      setDeleting(true);
+      setDeleting(true)
 
-      await deleteAlbum(id);
+      await deleteAlbum(id)
 
-      navigate("/albums");
+      navigate('/albums')
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Unable to delete album");
+      console.error(err)
+      alert(err.response?.data?.message || 'Unable to delete album')
     } finally {
-      setDeleting(false);
+      setDeleting(false)
     }
   }
 
   if (loading) {
     return (
-      <PageLayout title="Album">
+      <PageLayout title='Album'>
         <p>Loading...</p>
       </PageLayout>
-    );
+    )
   }
 
   if (!album) {
     return (
-      <PageLayout title="Album">
+      <PageLayout title='Album'>
         <p>Album not found.</p>
       </PageLayout>
-    );
+    )
   }
 
-  const isOwner = album.artist._id === user._id;
+  const isOwner = album.artist._id === user._id
 
   return (
     <PageLayout
       title={album.title}
-      subtitle={album.description || "Album details"}
+      subtitle={album.description || 'Album details'}
     >
       {album.image && (
         <img
           src={album.image}
           alt={album.title}
           className={styles.cover}
-          loading="lazy"
+          loading='lazy'
         />
       )}
 
@@ -90,7 +90,7 @@ function AlbumDetail() {
           <p className={styles.empty}>No songs in this album.</p>
         ) : (
           <div className={styles.trackList}>
-            {album.musics.map((music) => (
+            {album.musics.map(music => (
               <div key={music._id} className={styles.trackCard}>
                 <Link to={`/music/${music._id}`} className={styles.trackLink}>
                   {music.image ? (
@@ -98,7 +98,7 @@ function AlbumDetail() {
                       src={music.image}
                       alt={music.title}
                       className={styles.trackImage}
-                      loading="lazy"
+                      loading='lazy'
                     />
                   ) : (
                     <div className={styles.trackPlaceholder}>🎵</div>
@@ -121,13 +121,13 @@ function AlbumDetail() {
             Edit Album
           </Button>
 
-          <Button variant="secondary" onClick={handleDelete} loading={deleting}>
+          <Button variant='secondary' onClick={handleDelete} loading={deleting}>
             Delete Album
           </Button>
         </div>
       )}
     </PageLayout>
-  );
+  )
 }
 
-export default AlbumDetail;
+export default AlbumDetail
