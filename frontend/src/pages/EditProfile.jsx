@@ -1,92 +1,92 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import PageLayout from "../components/PageLayout/PageLayout";
-import Button from "../components/Button/Button";
-import Input from "../components/Input/Input";
+import PageLayout from '../components/PageLayout/PageLayout'
+import Button from '../components/Button/Button'
+import Input from '../components/Input/Input'
 
-import { getProfile, updateProfile } from "../services/profileService";
-import { useAuth } from "../context/AuthContext";
+import { getProfile, updateProfile } from '../services/profileService'
+import { useAuth } from '../context/AuthContext'
 
-import styles from "./EditProfile.module.css";
+import styles from './EditProfile.module.css'
 
-function EditProfile() {
-  const navigate = useNavigate();
-  const { refreshProfile } = useAuth();
+function EditProfile () {
+  const navigate = useNavigate()
+  const { refreshProfile } = useAuth()
 
-  const [username, setUsername] = useState("");
-  const [currentImage, setCurrentImage] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [preview, setPreview] = useState("");
+  const [username, setUsername] = useState('')
+  const [currentImage, setCurrentImage] = useState('')
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [preview, setPreview] = useState('')
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchProfile () {
       try {
-        const data = await getProfile();
+        const data = await getProfile()
 
-        setUsername(data.user.username);
-        setCurrentImage(data.user.profileImage || "");
+        setUsername(data.user.username)
+        setCurrentImage(data.user.profileImage || '')
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchProfile();
-  }, []);
+    fetchProfile()
+  }, [])
 
-  function handleImageChange(e) {
-    const file = e.target.files[0];
+  function handleImageChange (e) {
+    const file = e.target.files[0]
 
-    if (!file) return;
+    if (!file) return
 
-    setSelectedImage(file);
-    setPreview(URL.createObjectURL(file));
+    setSelectedImage(file)
+    setPreview(URL.createObjectURL(file))
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit (e) {
+    e.preventDefault()
 
-    setSaving(true);
+    setSaving(true)
 
     try {
-      const formData = new FormData();
+      const formData = new FormData()
 
-      formData.append("username", username);
+      formData.append('username', username)
 
       if (selectedImage) {
-        formData.append("image", selectedImage);
+        formData.append('image', selectedImage)
       }
 
-      await updateProfile(formData);
+      await updateProfile(formData)
 
-      await refreshProfile();
+      await refreshProfile()
 
-      navigate("/profile");
+      navigate('/profile')
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Failed to update profile.");
+      console.error(err)
+      alert(err.response?.data?.message || 'Failed to update profile.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
   if (loading) {
     return (
-      <PageLayout title="Edit Profile">
+      <PageLayout title='Edit Profile'>
         <h2>Loading...</h2>
       </PageLayout>
-    );
+    )
   }
 
   return (
     <PageLayout
-      title="Edit Profile"
-      subtitle="Update your profile information."
+      title='Edit Profile'
+      subtitle='Update your profile information.'
     >
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.imageSection}>
@@ -94,44 +94,44 @@ function EditProfile() {
             src={
               preview ||
               currentImage ||
-              "https://placehold.co/200x200?text=User"
+              'https://placehold.co/200x200?text=User'
             }
-            alt="Profile"
+            alt='Profile'
             className={styles.avatar}
-            loading="lazy"
+            loading='lazy'
           />
 
           <input
-            type="file"
-            accept="image/*"
+            type='file'
+            accept='image/*'
             onChange={handleImageChange}
             className={styles.fileInput}
           />
         </div>
 
         <Input
-          label="Username"
-          placeholder="Enter username"
+          label='Username'
+          placeholder='Enter username'
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={e => setUsername(e.target.value)}
         />
 
         <div className={styles.actions}>
           <Button
-            type="button"
-            variant="secondary"
-            onClick={() => navigate("/profile")}
+            type='button'
+            variant='secondary'
+            onClick={() => navigate('/profile')}
           >
             Cancel
           </Button>
 
-          <Button type="submit" loading={saving}>
+          <Button type='submit' loading={saving}>
             Save Changes
           </Button>
         </div>
       </form>
     </PageLayout>
-  );
+  )
 }
 
-export default EditProfile;
+export default EditProfile
