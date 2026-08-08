@@ -1,62 +1,62 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../context/AuthContext'
 
-import Button from "../components/Button/Button";
+import Button from '../components/Button/Button'
 
-import styles from "./LandingPage.module.css";
+import styles from './LandingPage.module.css'
 
-function LandingPage() {
-  const { user, loading } = useAuth();
+function LandingPage () {
+  const { user, loading } = useAuth()
 
   const features = [
     {
-      title: "Upload Your Music",
+      title: 'Upload Your Music',
       description:
-        "Upload your favorite tracks with beautiful cover art and keep everything organized in one place.",
-      image: "/images/Feature-1-Upload-Music.png",
+        'Upload your favorite tracks with beautiful cover art and keep everything organized in one place.',
+      image: '/images/Feature-1-Upload-Music.png'
     },
     {
-      title: "Create Beautiful Albums",
+      title: 'Create Beautiful Albums',
       description:
-        "Group your songs into albums and build collections that are easy to browse and share.",
-      image: "/images/Feature-2-Create-Albums.png",
+        'Group your songs into albums and build collections that are easy to browse and share.',
+      image: '/images/Feature-2-Create-Albums.png'
     },
     {
-      title: "Discover New Music",
+      title: 'Discover New Music',
       description:
-        "Explore tracks uploaded by other users and discover new artists from the community.",
-      image: "/images/Feature-3-Discover-Music.png",
+        'Explore tracks uploaded by other users and discover new artists from the community.',
+      image: '/images/Feature-3-Discover-Music.png'
     },
     {
-      title: "Build Your Profile",
+      title: 'Build Your Profile',
       description:
         "Showcase your uploads, albums, and let others discover the music you've shared.",
-      image: "/images/Feature-4-User-Profiles.png",
-    },
-  ];
+      image: '/images/Feature-4-User-Profiles.png'
+    }
+  ]
 
   return (
     <main className={styles.page}>
       {/* navbar */}
 
       <header className={styles.navbar}>
-        <Link to="/" className={styles.logo}>
+        <Link to='/' className={styles.logo}>
           Svara
         </Link>
 
         <div className={styles.navActions}>
           {!loading && user ? (
-            <Link to="/home">
+            <Link to='/home'>
               <Button>Go to Home</Button>
             </Link>
           ) : (
             <>
-              <Link to="/login">
-                <Button variant="secondary">Login</Button>
+              <Link to='/login'>
+                <Button variant='secondary'>Login</Button>
               </Link>
 
-              <Link to="/register">
+              <Link to='/register'>
                 <Button>Get Started</Button>
               </Link>
             </>
@@ -83,17 +83,17 @@ function LandingPage() {
 
           <div className={styles.heroButtons}>
             {!loading && user ? (
-              <Link to="/home">
+              <Link to='/home'>
                 <Button>Go to Home</Button>
               </Link>
             ) : (
               <>
-                <Link to="/register">
+                <Link to='/register'>
                   <Button>Get Started</Button>
                 </Link>
 
-                <Link to="/login">
-                  <Button variant="secondary">Login</Button>
+                <Link to='/login'>
+                  <Button variant='secondary'>Login</Button>
                 </Link>
               </>
             )}
@@ -101,7 +101,7 @@ function LandingPage() {
         </div>
 
         <div className={styles.heroImage}>
-          <img src="/images/Hero-Image.png" alt="Svara Hero" />
+          <img src='/images/Hero-Image.png' alt='Svara Hero' />
         </div>
       </section>
       {/* features */}
@@ -111,7 +111,7 @@ function LandingPage() {
           <div
             key={feature.title}
             className={`${styles.feature} ${
-              index % 2 === 1 ? styles.reverse : ""
+              index % 2 === 1 ? styles.reverse : ''
             }`}
           >
             <div className={styles.featureImage}>
@@ -140,17 +140,17 @@ function LandingPage() {
 
           <div className={styles.ctaButtons}>
             {!loading && user ? (
-              <Link to="/home">
+              <Link to='/home'>
                 <Button>Go to Home</Button>
               </Link>
             ) : (
               <>
-                <Link to="/register">
+                <Link to='/register'>
                   <Button>Get Started</Button>
                 </Link>
 
-                <Link to="/login">
-                  <Button variant="secondary">Login</Button>
+                <Link to='/login'>
+                  <Button variant='secondary'>Login</Button>
                 </Link>
               </>
             )}
@@ -158,7 +158,7 @@ function LandingPage() {
         </div>
 
         <div className={styles.ctaImage}>
-          <img src="/images/Final-CTA-Section.png" alt="Join Svara" />
+          <img src='/images/Final-CTA-Section.png' alt='Join Svara' />
         </div>
       </section>
 
@@ -172,7 +172,7 @@ function LandingPage() {
         <span>© 2026 Svara • Built by Prem Pravash Sahu</span>
       </footer>
     </main>
-  );
+  )
 }
 
-export default LandingPage;
+export default LandingPage
