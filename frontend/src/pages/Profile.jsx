@@ -1,76 +1,76 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import PageLayout from "../components/PageLayout/PageLayout";
-import Button from "../components/Button/Button";
-import MusicCard from "../components/MusicCard/MusicCard";
+import PageLayout from '../components/PageLayout/PageLayout'
+import Button from '../components/Button/Button'
+import MusicCard from '../components/MusicCard/MusicCard'
 
-import { getProfile } from "../services/profileService";
+import { getProfile } from '../services/profileService'
 import {
   getUserTracks,
   getUserAlbums,
-  getLikedTracks,
-} from "../services/musicService";
+  getLikedTracks
+} from '../services/musicService'
 
-import styles from "./Profile.module.css";
+import styles from './Profile.module.css'
 
-export default function Profile() {
-  const navigate = useNavigate();
+export default function Profile () {
+  const navigate = useNavigate()
 
-  const [profile, setProfile] = useState(null);
-  const [tracks, setTracks] = useState([]);
-  const [albums, setAlbums] = useState([]);
-  const [liked, setLiked] = useState([]);
+  const [profile, setProfile] = useState(null)
+  const [tracks, setTracks] = useState([])
+  const [albums, setAlbums] = useState([])
+  const [liked, setLiked] = useState([])
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchData () {
       try {
-        const profileData = await getProfile();
+        const profileData = await getProfile()
 
-        setProfile(profileData.user);
+        setProfile(profileData.user)
 
         const [trackData, albumData, likedData] = await Promise.all([
           getUserTracks(profileData.user._id),
           getUserAlbums(profileData.user._id),
-          getLikedTracks(),
-        ]);
+          getLikedTracks()
+        ])
 
-        setTracks(trackData.musics);
-        setAlbums(albumData.albums);
-        setLiked(likedData.musics);
+        setTracks(trackData.musics)
+        setAlbums(albumData.albums)
+        setLiked(likedData.musics)
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   if (loading) {
     return (
-      <PageLayout title="Profile">
+      <PageLayout title='Profile'>
         <h2>Loading...</h2>
       </PageLayout>
-    );
+    )
   }
 
   return (
-    <PageLayout title="Profile">
+    <PageLayout title='Profile'>
       <div className={styles.header}>
         <img
-          src={profile.profileImage || "https://placehold.co/200x200?text=User"}
+          src={profile.profileImage || 'https://placehold.co/200x200?text=User'}
           alt={profile.username}
           className={styles.avatar}
-          loading="lazy"
+          loading='lazy'
         />
 
         <h2>{profile.username}</h2>
 
-        <Button variant="secondary" onClick={() => navigate("/profile/edit")}>
+        <Button variant='secondary' onClick={() => navigate('/profile/edit')}>
           Edit Profile
         </Button>
       </div>
@@ -97,7 +97,7 @@ export default function Profile() {
           <h2>Recently Uploaded</h2>
 
           {tracks.length > 4 && (
-            <Button variant="secondary" onClick={() => navigate("/my-tracks")}>
+            <Button variant='secondary' onClick={() => navigate('/my-tracks')}>
               View All
             </Button>
           )}
@@ -107,18 +107,16 @@ export default function Profile() {
           <p className={styles.empty}>You haven't uploaded any music yet.</p>
         ) : (
           <div className={styles.grid}>
-            {tracks.slice(0, 4).map((music) => (
+            {tracks.slice(0, 4).map(music => (
               <MusicCard
                 key={music._id}
                 music={music}
-                isLiked={music.likes.some(
-                  (id) => id?.toString() === profile._id,
-                )}
+                isLiked={music.likes.some(id => id?.toString() === profile._id)}
               />
             ))}
           </div>
         )}
       </div>
     </PageLayout>
-  );
+  )
 }
