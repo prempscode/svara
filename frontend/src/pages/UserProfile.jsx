@@ -1,69 +1,69 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
-import PageLayout from "../components/PageLayout/PageLayout";
-import MusicCard from "../components/MusicCard/MusicCard";
+import PageLayout from '../components/PageLayout/PageLayout'
+import MusicCard from '../components/MusicCard/MusicCard'
 
-import { getUserProfile } from "../services/profileService";
-import { getUserTracks, getUserAlbums } from "../services/musicService";
+import { getUserProfile } from '../services/profileService'
+import { getUserTracks, getUserAlbums } from '../services/musicService'
 
-import styles from "./UserProfile.module.css";
+import styles from './UserProfile.module.css'
 
-function UserProfile() {
-  const { id } = useParams();
+function UserProfile () {
+  const { id } = useParams()
 
-  const [profile, setProfile] = useState(null);
-  const [tracks, setTracks] = useState([]);
-  const [albums, setAlbums] = useState([]);
+  const [profile, setProfile] = useState(null)
+  const [tracks, setTracks] = useState([])
+  const [albums, setAlbums] = useState([])
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchData () {
       try {
         const [profileData, trackData, albumData] = await Promise.all([
           getUserProfile(id),
           getUserTracks(id),
-          getUserAlbums(id),
-        ]);
+          getUserAlbums(id)
+        ])
 
-        setProfile(profileData.user);
-        setTracks(trackData.musics);
-        setAlbums(albumData.albums);
+        setProfile(profileData.user)
+        setTracks(trackData.musics)
+        setAlbums(albumData.albums)
       } catch (err) {
-        console.error(err);
+        console.error(err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchData();
-  }, [id]);
+    fetchData()
+  }, [id])
 
   if (loading) {
     return (
-      <PageLayout title="Profile">
+      <PageLayout title='Profile'>
         <h2>Loading...</h2>
       </PageLayout>
-    );
+    )
   }
 
   if (!profile) {
     return (
-      <PageLayout title="Profile">
+      <PageLayout title='Profile'>
         <h2>User not found.</h2>
       </PageLayout>
-    );
+    )
   }
 
   return (
     <PageLayout title={profile.username}>
       <div className={styles.header}>
         <img
-          src={profile.profileImage || "https://placehold.co/200x200?text=User"}
+          src={profile.profileImage || 'https://placehold.co/200x200?text=User'}
           alt={profile.username}
           className={styles.avatar}
-          loading="lazy"
+          loading='lazy'
         />
 
         <h2>{profile.username}</h2>
@@ -88,7 +88,7 @@ function UserProfile() {
           <p className={styles.empty}>No songs uploaded yet.</p>
         ) : (
           <div className={styles.grid}>
-            {tracks.map((music) => (
+            {tracks.map(music => (
               <MusicCard
                 key={music._id}
                 music={music}
@@ -107,7 +107,7 @@ function UserProfile() {
           <p className={styles.empty}>No albums created yet.</p>
         ) : (
           <div className={styles.albumGrid}>
-            {albums.map((album) => (
+            {albums.map(album => (
               <Link
                 key={album._id}
                 to={`/albums/${album._id}`}
@@ -118,7 +118,7 @@ function UserProfile() {
                     src={album.image}
                     alt={album.title}
                     className={styles.albumImage}
-                    loading="lazy"
+                    loading='lazy'
                   />
                 ) : (
                   <div className={styles.placeholder}>🎵</div>
@@ -134,7 +134,7 @@ function UserProfile() {
         )}
       </div>
     </PageLayout>
-  );
+  )
 }
 
-export default UserProfile;
+export default UserProfile
