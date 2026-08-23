@@ -31,7 +31,7 @@ const albumSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const albumModel = mongoose.model("album", albumSchema);
