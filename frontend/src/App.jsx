@@ -1,44 +1,44 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from 'react-router-dom'
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import Navbar from "./components/Navbar/Navbar";
+import ProtectedRoute from './components/ProtectedRoute'
+import Navbar from './components/Navbar/Navbar'
 
-import LandingPage from "./pages/LandingPage";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import LandingPage from './pages/LandingPage'
+import Login from './pages/Login'
+import Register from './pages/Register'
 
-import Home from "./pages/Home";
-import UploadMusic from "./pages/UploadMusic";
-import MusicDetail from "./pages/MusicDetail";
-import EditMusic from "./pages/EditMusic";
+import Home from './pages/Home'
+import UploadMusic from './pages/UploadMusic'
+import MusicDetail from './pages/MusicDetail'
+import EditMusic from './pages/EditMusic'
 
-import Liked from "./pages/Liked";
+import Liked from './pages/Liked'
 
-import Albums from "./pages/Albums";
-import AlbumDetail from "./pages/AlbumDetail";
-import CreateAlbum from "./pages/CreateAlbum";
-import EditAlbum from "./pages/EditAlbum";
+import Albums from './pages/Albums'
+import AlbumDetail from './pages/AlbumDetail'
+import CreateAlbum from './pages/CreateAlbum'
+import EditAlbum from './pages/EditAlbum'
 
-import Profile from "./pages/Profile";
-import EditProfile from "./pages/EditProfile";
-import UserProfile from "./pages/UserProfile";
+import Profile from './pages/Profile'
+import EditProfile from './pages/EditProfile'
+import UserProfile from './pages/UserProfile'
 
-import PublicRoute from "./components/PublicRoute";
+import PublicRoute from './components/PublicRoute'
 
 const ProtectedLayout = ({ children }) => (
   <>
     <Navbar />
     {children}
   </>
-);
+)
 
 const App = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path='/' element={<LandingPage />} />
       <Route
-        path="/login"
+        path='/login'
         element={
           <PublicRoute>
             <Login />
@@ -46,7 +46,7 @@ const App = () => {
         }
       />
       <Route
-        path="/register"
+        path='/register'
         element={
           <PublicRoute>
             <Register />
@@ -56,7 +56,7 @@ const App = () => {
 
       {/* protected routes */}
       <Route
-        path="/home"
+        path='/home'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -66,7 +66,7 @@ const App = () => {
         }
       />
       <Route
-        path="/upload"
+        path='/upload'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -76,7 +76,7 @@ const App = () => {
         }
       />
       <Route
-        path="/music/:id"
+        path='/music/:id'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -86,7 +86,7 @@ const App = () => {
         }
       />
       <Route
-        path="/music/:id/edit"
+        path='/music/:id/edit'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -96,7 +96,7 @@ const App = () => {
         }
       />
       <Route
-        path="/liked"
+        path='/liked'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -106,7 +106,7 @@ const App = () => {
         }
       />
       <Route
-        path="/albums"
+        path='/albums'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -116,7 +116,7 @@ const App = () => {
         }
       />
       <Route
-        path="/albums/:id"
+        path='/albums/:id'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -126,7 +126,7 @@ const App = () => {
         }
       />
       <Route
-        path="/albums/:id/edit"
+        path='/albums/:id/edit'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -136,7 +136,7 @@ const App = () => {
         }
       />
       <Route
-        path="/create-album"
+        path='/create-album'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -146,7 +146,7 @@ const App = () => {
         }
       />
       <Route
-        path="/profile"
+        path='/profile'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -156,7 +156,7 @@ const App = () => {
         }
       />
       <Route
-        path="/profile/edit"
+        path='/profile/edit'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -166,7 +166,7 @@ const App = () => {
         }
       />
       <Route
-        path="/users/:id"
+        path='/users/:id'
         element={
           <ProtectedRoute>
             <ProtectedLayout>
@@ -176,7 +176,7 @@ const App = () => {
         }
       />
     </Routes>
-  );
-};
+  )
+}
 
-export default App;
+export default App
