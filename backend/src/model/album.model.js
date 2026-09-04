@@ -1,38 +1,38 @@
 // backend/src/model/album.model.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const albumSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: true
     },
     description: {
       type: String,
-      default: "",
+      default: ''
     },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-      required: true,
+      ref: 'user',
+      required: true
     },
     musics: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "music",
-      },
+        ref: 'music'
+      }
     ],
     image: {
       type: String,
-      default: null,
+      default: null
     },
     imageFileId: {
       type: String,
-      default: null,
-    },
+      default: null
+    }
   },
-  { timestamps: true },
-);
+  { timestamps: true }
+)
 
-const albumModel = mongoose.model("album", albumSchema);
-module.exports = albumModel;
+const albumModel = mongoose.model('album', albumSchema)
+module.exports = albumModel
