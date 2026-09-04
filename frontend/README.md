@@ -13,7 +13,6 @@ The client application for **Svara**, a music playlist / streaming app. Built wi
 - 💿 **Albums** — Browse, create, view, and edit albums with linked tracks
 - 🙍 **Profiles** — View and edit your own profile, view other users' public profiles
 - 🛡️ **Protected Routes** — `ProtectedRoute` guards authenticated pages and redirects unauthenticated users
-- 💅 **CSS Modules** — Scoped, per-page styling alongside shared global styles and CSS variables
 
 ---
 
