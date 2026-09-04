@@ -1,21 +1,21 @@
-const musicModel = require("../model/music.model");
-const { uploadFile, deleteFile } = require("../services/storage.service");
-const albumModel = require("../model/album.model");
-const jwt = require("jsonwebtoken");
+const musicModel = require('../model/music.model')
+const { uploadFile, deleteFile } = require('../services/storage.service')
+const albumModel = require('../model/album.model')
+const jwt = require('jsonwebtoken')
 
-async function createMusic(req, res) {
+async function createMusic (req, res) {
   try {
-    const { title, description } = req.body;
+    const { title, description } = req.body
 
-    const audioFile = req.files.audio?.[0];
-    const imageFile = req.files.image?.[0];
+    const audioFile = req.files.audio?.[0]
+    const imageFile = req.files.image?.[0]
 
     if (!audioFile) {
-      return res.status(400).json({ message: "Audio file is required" });
+      return res.status(400).json({ message: 'Audio file is required' })
     }
 
-    const audioResult = await uploadFile(audioFile);
-    const imageResult = imageFile ? await uploadFile(imageFile) : null;
+    const audioResult = await uploadFile(audioFile)
+    const imageResult = imageFile ? await uploadFile(imageFile) : null
 
     const music = await musicModel.create({
       uri: audioResult.url,
@@ -24,103 +24,103 @@ async function createMusic(req, res) {
       imageFileId: imageResult?.fileId,
       title,
       description,
-      artist: req.user.id,
-    });
+      artist: req.user.id
+    })
 
-    res.status(201).json({ message: "Music submitted successfully", music });
+    res.status(201).json({ message: 'Music submitted successfully', music })
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function updateMusic(req, res) {
+async function updateMusic (req, res) {
   try {
-    const { id } = req.params;
-    const { title, description } = req.body;
+    const { id } = req.params
+    const { title, description } = req.body
 
-    console.log("📝 Updating music:", id);
-    console.log("📋 Body:", { title, description });
-    console.log("📎 Files:", req.files);
+    console.log('📝 Updating music:', id)
+    console.log('📋 Body:', { title, description })
+    console.log('📎 Files:', req.files)
 
-    const music = await musicModel.findById(id);
+    const music = await musicModel.findById(id)
 
     if (!music) {
-      return res.status(404).json({ message: "Music not found" });
+      return res.status(404).json({ message: 'Music not found' })
     }
 
     // ownership check — only the uploader can edit
     if (music.artist.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You can't edit this track" });
+      return res.status(403).json({ message: "You can't edit this track" })
     }
 
     // Update text fields
-    if (title) music.title = title;
-    if (description) music.description = description;
+    if (title) music.title = title
+    if (description) music.description = description
 
     // ✅ Handle image upload - check if files exist properly
-    const newImageFile = req.files?.image?.[0];
-    const newAudioFile = req.files?.audio?.[0];
+    const newImageFile = req.files?.image?.[0]
+    const newAudioFile = req.files?.audio?.[0]
 
     if (newImageFile) {
-      console.log("🖼️ Updating image...");
+      console.log('🖼️ Updating image...')
       try {
         // Delete old image if exists
         if (music.imageFileId) {
-          await deleteFile(music.imageFileId);
-          console.log("✅ Old image deleted");
+          await deleteFile(music.imageFileId)
+          console.log('✅ Old image deleted')
         }
         // Upload new image
-        const imageResult = await uploadFile(newImageFile);
-        music.image = imageResult.url;
-        music.imageFileId = imageResult.fileId;
-        console.log("✅ New image uploaded:", imageResult.fileId);
+        const imageResult = await uploadFile(newImageFile)
+        music.image = imageResult.url
+        music.imageFileId = imageResult.fileId
+        console.log('✅ New image uploaded:', imageResult.fileId)
       } catch (imgError) {
-        console.error("❌ Image upload error:", imgError.message);
+        console.error('❌ Image upload error:', imgError.message)
         // Continue with other updates
       }
     }
 
     if (newAudioFile) {
-      console.log("🎵 Updating audio...");
+      console.log('🎵 Updating audio...')
       try {
         // Delete old audio if exists
         if (music.audioFileId) {
-          await deleteFile(music.audioFileId);
-          console.log("✅ Old audio deleted");
+          await deleteFile(music.audioFileId)
+          console.log('✅ Old audio deleted')
         }
         // Upload new audio
-        const audioResult = await uploadFile(newAudioFile);
-        music.uri = audioResult.url;
-        music.audioFileId = audioResult.fileId;
-        console.log("✅ New audio uploaded:", audioResult.fileId);
+        const audioResult = await uploadFile(newAudioFile)
+        music.uri = audioResult.url
+        music.audioFileId = audioResult.fileId
+        console.log('✅ New audio uploaded:', audioResult.fileId)
       } catch (audioError) {
-        console.error("❌ Audio upload error:", audioError.message);
+        console.error('❌ Audio upload error:', audioError.message)
         // Continue with other updates
       }
     }
 
-    await music.save();
+    await music.save()
 
-    console.log("✅ Music updated:", music._id);
+    console.log('✅ Music updated:', music._id)
 
     res.status(200).json({
-      message: "Music updated successfully",
-      music,
-    });
+      message: 'Music updated successfully',
+      music
+    })
   } catch (e) {
-    console.error("❌ Error in updateMusic:", e.message);
-    console.error("❌ Full error:", e);
+    console.error('❌ Error in updateMusic:', e.message)
+    console.error('❌ Full error:', e)
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getAllMusics(req, res) {
+async function getAllMusics (req, res) {
   // using populate will give use the user detail instead of the id of the user, and
   // since are providing "username email" with the artist ref , it will only give us
   // the username and email , it will not give us the password and role .
@@ -136,47 +136,47 @@ async function getAllMusics(req, res) {
       what it does basically : it skip first 2 data and prints 4 data and 
       use this logic in pagination.
     */
-    const musics = await musicModel.find().populate("artist", "username email");
+    const musics = await musicModel.find().populate('artist', 'username email')
     res.status(200).json({
-      message: "Musics fetched successfully",
-      musics: musics,
-    });
+      message: 'Musics fetched successfully',
+      musics: musics
+    })
   } catch (e) {
     res.status(e.status || 500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function createAlbum(req, res) {
+async function createAlbum (req, res) {
   try {
-    const { title, description, musics } = req.body;
+    const { title, description, musics } = req.body
 
-    console.log(" Creating album with:", {
+    console.log(' Creating album with:', {
       title,
       description,
-      musics,
-    });
+      musics
+    })
 
     // Validate required fields
     if (!title) {
       return res.status(400).json({
-        message: "Album title is required",
-      });
+        message: 'Album title is required'
+      })
     }
 
     // Parse selected music IDs
-    let musicIds = [];
+    let musicIds = []
 
     if (musics) {
       try {
-        musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
+        musicIds = typeof musics === 'string' ? JSON.parse(musics) : musics
       } catch (e) {
-        console.error(" Error parsing musics:", e);
+        console.error(' Error parsing musics:', e)
         return res.status(400).json({
-          message: "Invalid tracks format",
-        });
+          message: 'Invalid tracks format'
+        })
       }
     }
 
@@ -184,57 +184,57 @@ async function createAlbum(req, res) {
     if (musicIds.length > 0) {
       const ownedTracks = await musicModel.find({
         _id: { $in: musicIds },
-        artist: req.user.id,
-      });
+        artist: req.user.id
+      })
 
       if (ownedTracks.length !== musicIds.length) {
         return res.status(403).json({
-          message: "You can only add your own songs to an album.",
-        });
+          message: 'You can only add your own songs to an album.'
+        })
       }
     }
 
     // Upload album cover (optional)
-    const imageFile = req.files?.image?.[0];
+    const imageFile = req.files?.image?.[0]
 
-    let imageResult = null;
+    let imageResult = null
 
     if (imageFile) {
-      console.log("🖼 Uploading album cover...");
+      console.log('🖼 Uploading album cover...')
 
-      imageResult = await uploadFile(imageFile);
+      imageResult = await uploadFile(imageFile)
 
-      console.log(" Album cover uploaded:", imageResult.fileId);
+      console.log(' Album cover uploaded:', imageResult.fileId)
     }
 
     // Create album
     const album = await albumModel.create({
       title,
-      description: description || "",
+      description: description || '',
       artist: req.user.id,
       musics: musicIds,
       image: imageResult?.url,
-      imageFileId: imageResult?.fileId,
-    });
+      imageFileId: imageResult?.fileId
+    })
 
-    console.log(" Album created:", album._id);
+    console.log(' Album created:', album._id)
 
     res.status(201).json({
-      message: "Album created successfully",
-      album,
-    });
+      message: 'Album created successfully',
+      album
+    })
   } catch (e) {
-    console.error(" Error in createAlbum:", e.message);
-    console.error(" Full error:", e);
+    console.error(' Error in createAlbum:', e.message)
+    console.error(' Full error:', e)
 
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getAllAlbums(req, res) {
+async function getAllAlbums (req, res) {
   try {
     /* here we are showing all the albums,
     problem : when it loads all the albums and its musics it is very bulky so 
@@ -245,261 +245,261 @@ async function getAllAlbums(req, res) {
 
     const albums = await albumModel
       .find()
-      .select("title artist image")
-      .populate("artist", "username");
+      .select('title artist image')
+      .populate('artist', 'username')
 
     res.status(201).json({
-      message: "Albums fetched successfully",
-      albums: albums,
-    });
+      message: 'Albums fetched successfully',
+      albums: albums
+    })
   } catch (e) {
     res.status(e.status || 500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
 // Get Album by ID
-async function getAlbumById(req, res) {
+async function getAlbumById (req, res) {
   try {
-    const { id } = req.params;
-    console.log("🔍 Fetching album:", id);
+    const { id } = req.params
+    console.log('🔍 Fetching album:', id)
 
     const album = await albumModel
       .findById(id)
-      .populate("artist", "username email")
+      .populate('artist', 'username email')
       .populate({
-        path: "musics",
+        path: 'musics',
         populate: {
-          path: "artist",
-          select: "username email",
-        },
-      });
+          path: 'artist',
+          select: 'username email'
+        }
+      })
 
     if (!album) {
-      return res.status(404).json({ message: "Album not found" });
+      return res.status(404).json({ message: 'Album not found' })
     }
 
-    console.log("✅ Album found:", album._id);
+    console.log('✅ Album found:', album._id)
 
     res.status(200).json({
-      message: "Album fetched successfully",
-      album: album,
-    });
+      message: 'Album fetched successfully',
+      album: album
+    })
   } catch (e) {
-    console.error("❌ Error in getAlbumById:", e.message);
+    console.error('❌ Error in getAlbumById:', e.message)
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function deleteMusic(req, res) {
+async function deleteMusic (req, res) {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
     // find the track
-    const music = await musicModel.findById(id);
+    const music = await musicModel.findById(id)
 
     if (!music) {
-      return res.status(404).json({ message: "Music not found" });
+      return res.status(404).json({ message: 'Music not found' })
     }
 
     // check ownership
     if (music.artist.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You can't delete this track" });
+      return res.status(403).json({ message: "You can't delete this track" })
     }
 
     // delete files from ImageKit
     try {
       if (music.audioFileId) {
-        await deleteFile(music.audioFileId);
+        await deleteFile(music.audioFileId)
       }
       if (music.imageFileId) {
-        await deleteFile(music.imageFileId);
+        await deleteFile(music.imageFileId)
       }
     } catch (imagekitError) {
-      console.error("ImageKit deletion error:", imagekitError.message);
+      console.error('ImageKit deletion error:', imagekitError.message)
     }
 
     // delete from database
-    await musicModel.findByIdAndDelete(id);
+    await musicModel.findByIdAndDelete(id)
 
     res.status(200).json({
-      message: "Music deleted successfully",
-      musicId: id,
-    });
+      message: 'Music deleted successfully',
+      musicId: id
+    })
   } catch (e) {
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getUserTracks(req, res) {
+async function getUserTracks (req, res) {
   try {
-    const { userId } = req.params;
+    const { userId } = req.params
 
     const [musics, total] = await Promise.all([
       musicModel
         .find({ artist: userId })
-        .populate("artist", "username")
+        .populate('artist', 'username')
         .sort({ createdAt: -1 }),
-      musicModel.countDocuments({ artist: userId }),
-    ]);
+      musicModel.countDocuments({ artist: userId })
+    ])
 
     res.status(200).json({
-      message: "User tracks fetched successfully",
-      musics: musics,
-    });
+      message: 'User tracks fetched successfully',
+      musics: musics
+    })
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getUserAlbums(req, res) {
+async function getUserAlbums (req, res) {
   try {
-    const { userId } = req.params;
+    const { userId } = req.params
 
     const albums = await albumModel
       .find({ artist: userId })
-      .select("title image artist")
-      .populate("artist", "username")
-      .sort({ createdAt: -1 });
+      .select('title image artist')
+      .populate('artist', 'username')
+      .sort({ createdAt: -1 })
 
     res.status(200).json({
-      message: "User albums fetched successfully",
-      albums,
-    });
+      message: 'User albums fetched successfully',
+      albums
+    })
   } catch (e) {
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function toggleLike(req, res) {
+async function toggleLike (req, res) {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
+    const { id } = req.params
+    const userId = req.user.id
 
-    const music = await musicModel.findById(id);
+    const music = await musicModel.findById(id)
     if (!music) {
-      return res.status(404).json({ message: "Music not found" });
+      return res.status(404).json({ message: 'Music not found' })
     }
 
-    const likeIndex = music.likes.indexOf(userId);
-    const isLiked = likeIndex !== -1;
+    const likeIndex = music.likes.indexOf(userId)
+    const isLiked = likeIndex !== -1
 
     if (isLiked) {
       // Unlike: Remove user ID
-      music.likes.splice(likeIndex, 1);
+      music.likes.splice(likeIndex, 1)
     } else {
       // Like: Add user ID
-      music.likes.push(userId);
+      music.likes.push(userId)
     }
 
     // Update likesCount
-    music.likesCount = music.likes.length;
-    await music.save();
+    music.likesCount = music.likes.length
+    await music.save()
 
     //  Return consistent response
     res.status(200).json({
-      message: isLiked ? "Track unliked" : "Track liked",
+      message: isLiked ? 'Track unliked' : 'Track liked',
       likes: music.likes.length,
-      isLiked: !isLiked, // Send the new status
-    });
+      isLiked: !isLiked // Send the new status
+    })
   } catch (e) {
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getLikedFeed(req, res) {
+async function getLikedFeed (req, res) {
   try {
-    const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const userId = req.user.id
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
 
     const [musics, total] = await Promise.all([
       musicModel
         .find({ likes: userId })
-        .populate("artist", "username email")
+        .populate('artist', 'username email')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      musicModel.countDocuments({ likes: userId }),
-    ]);
+      musicModel.countDocuments({ likes: userId })
+    ])
 
     res.status(200).json({
-      message: "Liked feed fetched successfully",
+      message: 'Liked feed fetched successfully',
       musics: musics,
       pagination: {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
-      },
-    });
+        pages: Math.ceil(total / limit)
+      }
+    })
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
 // Update Album
-async function updateAlbum(req, res) {
+async function updateAlbum (req, res) {
   try {
-    const { id } = req.params;
-    const { title, description, musics } = req.body;
+    const { id } = req.params
+    const { title, description, musics } = req.body
 
-    console.log("Updating album:", id);
-    console.log("Data:", {
+    console.log('Updating album:', id)
+    console.log('Data:', {
       title,
       description,
-      musics,
-    });
+      musics
+    })
 
     // Find album
-    const album = await albumModel.findById(id);
+    const album = await albumModel.findById(id)
 
     if (!album) {
       return res.status(404).json({
-        message: "Album not found",
-      });
+        message: 'Album not found'
+      })
     }
 
     // Ownership check
     if (album.artist.toString() !== req.user.id) {
       return res.status(403).json({
-        message: "You can't edit this album",
-      });
+        message: "You can't edit this album"
+      })
     }
 
     // Parse selected music IDs
-    let musicIds = [];
+    let musicIds = []
 
     if (musics) {
       try {
-        musicIds = typeof musics === "string" ? JSON.parse(musics) : musics;
+        musicIds = typeof musics === 'string' ? JSON.parse(musics) : musics
       } catch (e) {
-        console.error(" Error parsing musics:", e);
+        console.error(' Error parsing musics:', e)
 
         return res.status(400).json({
-          message: "Invalid tracks format",
-        });
+          message: 'Invalid tracks format'
+        })
       }
     }
 
@@ -507,127 +507,127 @@ async function updateAlbum(req, res) {
     if (musicIds.length > 0) {
       const ownedTracks = await musicModel.find({
         _id: { $in: musicIds },
-        artist: req.user.id,
-      });
+        artist: req.user.id
+      })
 
       if (ownedTracks.length !== musicIds.length) {
         return res.status(403).json({
-          message: "You can only add your own songs to an album.",
-        });
+          message: 'You can only add your own songs to an album.'
+        })
       }
     }
 
     // Update album fields
     if (title) {
-      album.title = title;
+      album.title = title
     }
 
     if (description) {
-      album.description = description;
+      album.description = description
     }
 
     if (musicIds.length > 0) {
-      album.musics = musicIds;
+      album.musics = musicIds
     }
 
     // Update album cover
-    const imageFile = req.files?.image?.[0];
+    const imageFile = req.files?.image?.[0]
 
     if (imageFile) {
-      console.log(" Updating album cover...");
+      console.log(' Updating album cover...')
 
       if (album.imageFileId) {
         try {
-          await deleteFile(album.imageFileId);
+          await deleteFile(album.imageFileId)
         } catch (error) {
-          console.error("Error deleting old image:", error.message);
+          console.error('Error deleting old image:', error.message)
         }
       }
 
-      const imageResult = await uploadFile(imageFile);
+      const imageResult = await uploadFile(imageFile)
 
-      album.image = imageResult.url;
-      album.imageFileId = imageResult.fileId;
+      album.image = imageResult.url
+      album.imageFileId = imageResult.fileId
 
-      console.log(" Album cover updated:", imageResult.fileId);
+      console.log(' Album cover updated:', imageResult.fileId)
     }
 
-    await album.save();
+    await album.save()
 
-    console.log(" Album updated:", album._id);
+    console.log(' Album updated:', album._id)
 
     res.status(200).json({
-      message: "Album updated successfully",
-      album,
-    });
+      message: 'Album updated successfully',
+      album
+    })
   } catch (e) {
-    console.error(" Error in updateAlbum:", e.message);
-    console.error(" Full error:", e);
+    console.error(' Error in updateAlbum:', e.message)
+    console.error(' Full error:', e)
 
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function deleteAlbum(req, res) {
+async function deleteAlbum (req, res) {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
-    const album = await albumModel.findById(id);
+    const album = await albumModel.findById(id)
     if (!album) {
-      return res.status(404).json({ message: "Album not found" });
+      return res.status(404).json({ message: 'Album not found' })
     }
 
     if (album.artist.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You can't delete this album" });
+      return res.status(403).json({ message: "You can't delete this album" })
     }
 
     // Delete album cover from ImageKit
     if (album.imageFileId) {
       try {
-        await deleteFile(album.imageFileId);
+        await deleteFile(album.imageFileId)
       } catch (error) {
-        console.error("ImageKit deletion error:", error.message);
+        console.error('ImageKit deletion error:', error.message)
       }
     }
 
-    await albumModel.findByIdAndDelete(id);
+    await albumModel.findByIdAndDelete(id)
 
     res.status(200).json({
-      message: "Album deleted successfully",
-      albumId: id,
-    });
+      message: 'Album deleted successfully',
+      albumId: id
+    })
   } catch (e) {
     res.status(500).json({
-      message: "error occured in music.controller",
-      error: e.message,
-    });
+      message: 'error occured in music.controller',
+      error: e.message
+    })
   }
 }
 
-async function getMusicById(req, res) {
+async function getMusicById (req, res) {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
     const music = await musicModel
       .findById(id)
-      .populate("artist", "username email profileImage");
+      .populate('artist', 'username email profileImage')
 
     if (!music) {
-      return res.status(404).json({ message: "Music not found" });
+      return res.status(404).json({ message: 'Music not found' })
     }
 
     res.status(200).json({
-      message: "Music fetched successfully",
-      music: music,
-    });
+      message: 'Music fetched successfully',
+      music: music
+    })
   } catch (e) {
     res.status(500).json({
-      message: "Error occurred in music.controller",
-      error: e.message,
-    });
+      message: 'Error occurred in music.controller',
+      error: e.message
+    })
   }
 }
 
@@ -645,5 +645,5 @@ module.exports = {
   toggleLike,
   getLikedFeed,
   updateAlbum,
-  deleteAlbum,
-};
+  deleteAlbum
+}
